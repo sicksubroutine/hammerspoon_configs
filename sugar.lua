@@ -23,3 +23,14 @@ function LoadAndCheck(moduleName)
     print("Module loaded successfully:", moduleName)
     return module 
 end
+
+function UnixTimestamp()
+  return os.time()
+end
+
+function HumanTimestamp()
+  return os.date("%m-%d-%Y %I:%M:%S %p")
+end
+
+_G.UnixTimestamp = UnixTimestamp
+_G.HumanTimestamp = HumanTimestamp

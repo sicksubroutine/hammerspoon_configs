@@ -41,22 +41,20 @@ local function turnOnWifi()
 end
 
 -- Private Methods
-function Connection:timestamp()
-    return os.time()
-end
+
 
 function Connection:p_debug(message)
     if self.debug then print(message) end
 end
 
 function Connection:checkTime()
-    local last_checked = self.settings:get("last_checked", self:timestamp())
+    local last_checked = self.settings:get("last_checked", UnixTimestamp())
     if not last_checked then
-        C:p_debug("Last checked is nil")
-        self.settings:save("last_checked", self:timestamp())
+        Connection:p_debug("Last checked is nil")
+        self.settings:save("last_checked", UnixTimestamp())
         return true
     end
-    local current_time = self:timestamp()
+    local current_time = UnixTimestamp()
     local difference = os.difftime(current_time, last_checked)
     return difference > WAIT_TIME
 end
@@ -108,7 +106,7 @@ function Connection:checkInterfaces()
     local ethernet_status = self:checkEthernetStatus()
 
     Connection:p_debug(string.format("Current States - WiFi: %s, Ethernet: %s", tostring(wifi_status), tostring(ethernet_status)))
-    self.settings:save("last_checked", self:timestamp())
+    self.settings:save("last_checked", UnixTimestamp())
 
     local no_interfaces = not wifi_status and not ethernet_status
     local ethernet_and_wifi = wifi_status and ethernet_status
@@ -131,7 +129,7 @@ end
 
 function Connection:start()
     local timer = hs.timer.doEvery(WAIT_TIME, function()
-        local current_time = self:timestamp()
+        local current_time = UnixTimestamp()
         local last_checked = self.settings:get("last_checked", 0)
         local time_diff = os.difftime(current_time, last_checked)
         

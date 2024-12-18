@@ -1,7 +1,5 @@
 -- public functions
-local function getTimeStamp()
-    return os.date("%m-%d-%Y %I:%M:%S %p")
-end
+
 
 local class = require("30log")
 
@@ -73,40 +71,32 @@ end
 
 
 function Logger:_log(level, args)
-    print("args", args)
     local message = table.concat(args, "\t")
-    -- local log = self:loggerMap(level)
-    -- if log then
-    --     log(message)
-    -- end
-    self:write("[".. level:upper() .. "] " .. message)
+    message = HumanTimestamp() .. "\t" .. message
+    self.logfile:write("[".. level:upper() .. "] " .. message .. "\n")
+    self.logfile:flush()
 end
 
-function Logger:info(...)
-    local args = {...}
-    local message = table.concat(args, "\t")
-    message = getTimeStamp() .. "\t" .. message
-    self:_log("info", message)
-end
+function Logger:info(...) self:_log("info", {...}) end
 
 function Logger:error(...)
     local args = {...}
     local message = table.concat(args, "\t")
-    message = getTimeStamp() .. "\t" .. message
+    message = HumanTimestamp() .. "\t" .. message
     self:_log("error", message)
 end
 
 function Logger:warning(...)
     local args = {...}
     local message = table.concat(args, "\t")
-    message = getTimeStamp() .. "\t" .. message
+    message = HumanTimestamp() .. "\t" .. message
     self:_log("warning", message)
 end
 
 function Logger:debug(...)
     local args = {...}
     local message = table.concat(args, "\t")
-    message = getTimeStamp() .. "\t" .. message
+    message = HumanTimestamp() .. "\t" .. message
     self:_log("debug", message)
 end
 

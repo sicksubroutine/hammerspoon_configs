@@ -15,11 +15,17 @@ function Hyper:init(debug)
         return nil
     end
     self:updateMenubar()
-
-    self.eventtap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
+    print("-- HyperMode Initialized")
+    local tap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
         ---@type hs.eventtap.event
         return self:handleKeyEvent(event)
     end)
+
+    if tap then 
+        self.eventtap = tap 
+    else
+        hs.alert.show("Debug: tap is nil") 
+    end
 
     if not self.eventtap then
         hs.alert.show("Failed to create event tap")
@@ -28,6 +34,16 @@ function Hyper:init(debug)
 
     return self
 end
+
+--- comment Returns the event tap for the Hyper Mode
+---@return hs.eventtap
+function Hyper:returnEventTap()
+    local tap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
+        return self:handleKeyEvent(event)
+    end)
+    return tap
+end
+    
 
 function Hyper:getMode()
     return self.hyperModeActive
@@ -54,9 +70,7 @@ function Hyper:createMenu()
             title = "Status: " .. (self.hyperModeActive and "Hyper Mode Active 🔴" or "Hyper Mode Inactive ⚪"),
             fn = function() self:toggleHyperMode() end
         },
-
         __separator__,
-
         {
             title = "Available Commands:",
             disabled = true
@@ -65,9 +79,11 @@ function Hyper:createMenu()
             title = "• Hyper + Space: Launch Raycast",
             fn = function() hs.application.launchOrFocus(RAYCAST) end
         },
-
+        {
+            title = "• Launch Start Applications",
+            fn = function() hs.application.launchOrFocus("Start") end
+        },
         __separator__,
-
         {
             title = "Reload Configuration",
             fn = function() hs.reload() end
@@ -138,23 +154,22 @@ function Hyper:handleKeyEvent(event)
     return false
 end
 
-function Hyper:start_service()
-    if not self.eventtap then
-        print("Debug: eventtap is nil")
-        return false
+function Hyper:startService()
+    if self.eventtap == nil then
+        self.eventtap = Hyper:returnEventTap()
     end
     local status, err = pcall(function()
         self.eventtap:start()
         self:hyperBind({}, "F17", function() self:toggleHyperMode() end)
     end)
     if not status then
-        hs.alert.show("Failed to start service: " .. str(err))
+        hs.alert.show("Failed to start service: " .. tostring(err))
         return false
     end
     return true
 end
 
-function Hyper:stop_service()
+function Hyper:stopService()
     if self.eventtap then
         self.eventtap:stop()
     end

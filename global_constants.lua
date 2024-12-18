@@ -1,9 +1,11 @@
 HAMMERSPOON_PATH = os.getenv("HOME") .. "/.hammerspoon/"
 LOGGER_FILE_NAME = "__hammerspoon.log"
-DEBUG = true
+DEBUG = false
 RAYCAST = "Raycast"
+HYPERKEY = {"cmd", "ctrl", "alt", "shift"}
 
 _G.HAMMERSPOON_PATH = HAMMERSPOON_PATH
 _G.LOGGER_FILE_NAME = LOGGER_FILE_NAME
 _G.DEBUG = DEBUG
 _G.RAYCAST = RAYCAST
+_G.HYPERKEY = HYPERKEY
