@@ -1,5 +1,4 @@
 require("_load")
-if Reload then Reload():init():start() hs.alert.show("Config loaded") end
 local connect = require('connection')():init(Settings, DEBUG)
 connect:checkInterfaces()
 connect:start()

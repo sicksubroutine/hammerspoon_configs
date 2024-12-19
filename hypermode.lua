@@ -2,13 +2,19 @@
 ---@diagnostic disable: undefined-field
 local class = require("30log")
 ---@class Hyper
+---@field debug boolean
+---@field hyperModeActive boolean
+---@field eventtap hs.eventtap
+---@field menubarItem hs.menubar
 local Hyper = class({ name = "Hyper" })
 
 --- comment Initialized the Hyper class
 --- @param debug boolean
+--- @return Hyper
 function Hyper:init(debug)
     self.debug = debug
     self.hyperModeActive = false
+    self.eventtap = nil
     self.menubarItem = hs.menubar.new()
     if not self.menubarItem then
         hs.alert.show("Failed to create menubar item")
@@ -16,22 +22,7 @@ function Hyper:init(debug)
     end
     self:updateMenubar()
     print("-- HyperMode Initialized")
-    local tap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
-        ---@type hs.eventtap.event
-        return self:handleKeyEvent(event)
-    end)
-
-    if tap then 
-        self.eventtap = tap 
-    else
-        hs.alert.show("Debug: tap is nil") 
-    end
-
-    if not self.eventtap then
-        hs.alert.show("Failed to create event tap")
-        return nil
-    end
-
+    
     return self
 end
 
@@ -130,13 +121,26 @@ function Hyper:hyperKeyChecks(hyper_key, key)
     return false
 end
 
+local function compFlags(pattern, flags)
+    for i, v in ipairs(flags) do
+        if not pattern[v] then
+            return false
+        end
+    end
+    return true
+end
+
 ---comment Handles the key events for fun and profit
 ---@param event hs.eventtap.event
 ---@return boolean
 function Hyper:handleKeyEvent(event)
     if self.hyperModeActive then
-        local modifiers = event:getFlags()
-        local hyper_key = modifiers["cmd"] and modifiers["ctrl"] and modifiers["alt"] and modifiers["shift"]
+        local flags = event:getFlags()
+
+        local ctrl, cmd, alt, shift = {ctrl=true}, {cmd=true}, {alt=true}, {shift=true}
+
+        local hyper_key = compFlags(HYPERKEY, flags)
+        print("Hyper Key: " .. tostring(hyper_key))
         local keyPressed = hs.keycodes.map[event:getKeyCode()]
 
         if keyPressed == "space" then
