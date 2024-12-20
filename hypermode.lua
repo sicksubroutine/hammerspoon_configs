@@ -50,6 +50,7 @@ function Hyper:toggleHyperMode()
     self:updateMenubar()
 end
 
+
 ---comment Creates the menubar for the Hyper Mode
 ---@return table
 function Hyper:createMenu()
@@ -66,11 +67,15 @@ function Hyper:createMenu()
             disabled = true
         },
         {
-            title = "• Hyper + Space: Launch Raycast",
-            fn = function() hs.application.launchOrFocus(RAYCAST) end
+            title = "❖ + N: Rebuild NixOS Configuration",
+            fn = function() end
         },
         {
-            title = "• Launch Start Applications",
+            title = "❖ + Space: Launch Raycast",
+            fn = function() hs.application.launchOrFocus(RaycastName) end
+        },
+        {
+            title = "Launch Start Applications",
             fn = function() hs.application.launchOrFocus("Start") end
         },
         __separator__,
@@ -84,11 +89,9 @@ end
 function Hyper:updateMenubar()
     if self.menubarItem then
         if self.hyperModeActive then
-            -- red dot for active
-            self.menubarItem:setTitle("🔴")
+            self.menubarItem:setTitle("🔴") -- red dot for active
         else
-            -- White dot for inactive
-            self.menubarItem:setTitle("⚪")
+            self.menubarItem:setTitle("⚪") -- White dot for inactive
         end
     end
     self.menubarItem:setMenu(self:createMenu())
@@ -103,24 +106,10 @@ function Hyper:hyperBind(modifiers, key, pressedfn, releasedfn)
     hs.hotkey.bind(modifiers, key, pressedfn, releasedfn)
 end
 
----comment String comparison for hyper key checks
----@param hyper_key boolean
----@param key string
----@return boolean
-function Hyper:hyperKeyChecks(hyper_key, key)
-    if hyper_key then
-        if key == "a" then
-            self:toggleHyperMode()
-            return true
-        elseif key == "r" then
-            hs.reload()
-            return true
-        end
-    end
-    return false
-end
-
 local function compFlags(pattern, flags)
+    if pattern == nil then
+        return false
+    end
     for i, v in ipairs(flags) do
         if not pattern[v] then
             return false
@@ -129,51 +118,71 @@ local function compFlags(pattern, flags)
     return true
 end
 
+---comment String comparison for hyper key checks
+---@param key string
+---@return boolean
+function Hyper:hyperKeyChecks(key)
+    if key == "a" then
+        self:toggleHyperMode()
+        return true
+    elseif key == "r" then
+        hs.reload()
+        return true
+    elseif key == "n" then
+        hs.alert.show("Rebuilding NixOS Configuration, please standby...")
+        hs.execute("open ~/.hammerspoon/__hammerspoon.log")
+        hs.timer.doAfter(1, function()
+            local output, _, _ = hs.execute("darwin-rebuild switch --flake ~/.config/nix/#pluto", true)
+            logger:debug(output)
+        end)
+    end
+    return false
+end
+
+function Hyper:whileHyperModeActive(keyPressed)
+    debugPrint("Processing active hyper mode key: " .. tostring(keyPressed))
+    if keyPressed == "a" then
+        hs.alert.show("Hyper A")
+        return true
+    elseif keyPressed == "r" then
+        hs.reload()
+        return true
+    elseif keyPressed == "k" then
+        print("Killing Hammerspoon")
+        hs.alert.show("Killing Hammerspoon")
+        hs.execute("killall Hammerspoon")
+        return true
+    elseif keyPressed == "space" then
+        print("Launching Raycast")
+        hs.application.launchOrFocus(RaycastName)
+        self:toggleHyperMode()
+        return true
+    end
+end
+
 ---comment Handles the key events for fun and profit
 ---@param event hs.eventtap.event
 ---@return boolean
 function Hyper:handleKeyEvent(event)
     local keyPressed = hs.keycodes.map[event:getKeyCode()]
     local flags = event:getFlags()
-    
-    -- Add debug logging
-    print("Key pressed: " .. tostring(keyPressed))
-    print("Flags: " .. hs.inspect(flags))
-    print("Hyper Mode Active: " .. tostring(self.hyperModeActive))
-    
-    local hyper_key = compFlags(flags, {"cmd", "alt", "ctrl", "shift"})
-    print("Hyper key match: " .. tostring(hyper_key))
+    local hyperKey = compFlags(flags, {"cmd", "alt", "ctrl", "shift"})
+
+    if DebugMode then
+        print("Key pressed: " .. tostring(keyPressed))
+        print("Flags: " .. hs.inspect(flags))
+        print("Hyper Mode Active: " .. tostring(self.hyperModeActive))
+        print("Hyper key match: " .. tostring(hyperKey))
+    end
+
+    if hyperKey then
+        return self:hyperKeyChecks(keyPressed)
+    end
 
     if self.hyperModeActive then
-        print("Processing active hyper mode key: " .. tostring(keyPressed))
-        
-        if keyPressed == "k" then
-            print("Killing Hammerspoon")
-            hs.alert.show("Killing Hammerspoon")
-            hs.execute("killall Hammerspoon")
-            return true
-        end
-
-        if keyPressed == "space" then
-            print("Launching Raycast")
-            hs.application.launchOrFocus(RAYCAST)
-            self:toggleHyperMode()
-            return true
-        end
-        
-        if self:hyperKeyChecks(hyper_key, keyPressed) then 
-            print("Hyper key check passed")
-            return true 
-        end
-
-        if keyPressed == "a" then
-            print("Hyper A pressed")
-            hs.alert.show("Hyper A")
-            return true
-        end
+        return self:whileHyperModeActive(keyPressed)
     end
-    
-    print("Event not handled")
+
     return false
 end
 

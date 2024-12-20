@@ -1,27 +1,39 @@
 local class = require("30log")
 
----@class Settings
-local Settings = class({name = "Settings"})
+---@class SettingsManager
+---@field private prefix string
+---@field private debug boolean
+local SettingsManager = class({name = "Settings"})
 
-function Settings:init(name, debug)
+--- Initializes the SettingsManager class
+---@param name string
+---@param debug boolean
+---@return SettingsManager
+function SettingsManager:init(name, debug)
     self.prefix = name and name .. "." or ""
-    self.debug = debug
+    self.debug = debug or false
     return self
 end
 
-function Settings:save(key, value)
+function SettingsManager:set(key, value)
     hs.settings.set(self.prefix .. key, value)
     local check = hs.settings.get(self.prefix .. key)
-    if self.debug then print("Saved Key to Settings [" .. key .."]: "..tostring(check)) end
+    if self.debug then print("Added Key to Settings [" .. key .."]: "..tostring(check)) end
 end
 
-function Settings:get(key, default)
+function SettingsManager:setAll(data)
+    for key, value in pairs(data) do
+        self:set(key, value)
+    end
+end
+
+function SettingsManager:get(key, default)
     local value = hs.settings.get(self.prefix .. key)
     if self.debug then print("Getting Key from Settings [" .. key .."]: "..tostring(value)) end
     return value ~= nil and value or default
 end
 
-function Settings:delete(key)
+function SettingsManager:delete(key)
     if self:get(key) == nil then
         if self.debug then print("Key [" .. key .. "] does not exist") end
         return false
@@ -31,19 +43,19 @@ function Settings:delete(key)
     if self.debug then print("Deleted Key from Settings [" .. key .."]: "..tostring(check)) end
 end
 
-function Settings:clear()
+function SettingsManager:clear()
     if self.debug then print("Clearing all settings") end
     return hs.settings.clear()
 end
 
-function Settings:getAllKeys()
-    -- Get all keys in the settings
-    -- If a prefix is set, only return keys with that prefixes in a table
-
+--- Returns all keys in the settings with the prefix
+---@return table
+function SettingsManager:getAllKeys()
     local all_keys = hs.settings.getKeys()
     if not all_keys then
         return {}
     end
+    
     local prefix_keys = {}
     for _, key in ipairs(all_keys) do
         if string.sub(key, 1, #self.prefix) == self.prefix then
@@ -55,4 +67,4 @@ function Settings:getAllKeys()
     return prefix_keys
 end
 
-return Settings
+_G.SettingsManager = SettingsManager

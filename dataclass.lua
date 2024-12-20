@@ -110,6 +110,8 @@ function dataclass(class_name, fields)
     return NewClass
 end
 
+_G.dataclass = dataclass
+
 
 -- local Person = dataclass("Person", {
 --     name = {type = "string"},

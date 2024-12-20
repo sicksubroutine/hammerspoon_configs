@@ -1,26 +1,37 @@
+---@diagnostic disable: lowercase-global
+local logging = require("logging")
+logger = logging:getLogger("__hammerspoon", "debug")
+
+local bPrint = print
+_G.print = function(...)
+    local args = {...}
+    local message = table.concat(args, "\t")
+    logger:info(message)
+    bPrint(...)
+end
+
 --[[#################################]]--
 hs.loadSpoon('EmmyLua')
 require('hs.ipc')
 require("sugar")
+require("dataclass")
+require("settings")
 require("global_constants")
+require("logging")
 --[[#################################]]--
-Settings = require("settings") -- leaving it uninitialized so it can be created with different prefixes
-local reload = require("reload")
-local hypermode = require('hypermode')
-if reload then reload():init():start() hs.alert.show("Config loaded") end
-local hyper = hypermode()
-if hyper then hs.alert.show("HyperMode Initialized") else hs.alert.show("Failed to initialize Hyper Mode") end
-hypermode:init()
-hs.hotkey.bind(HYPERKEY, "a", function() hyper:toggleHyperMode() end)
-
+local hyper = require("hypermode")():init()
+if hyper then
+    hs.alert.show("HyperMode Initialized")
+    hs.hotkey.bind({}, "F17", function()
+        hyper:toggleHyperMode()
+    end)
+else
+    hs.alert.show("Failed to initialize Hyper Mode")
+end
 --[[#################################
 #         Keybindings               #
 #       Global Shortcuts            #
 #################################--]]
-hs.hotkey.bind({}, "F17", function() hyper:toggleHyperMode() end)
 hs.hotkey.bind({"cmd", "alt"}, "space", function() hs.application.launchOrFocus("Start") end)
-hs.hotkey.bind(HYPERKEY, "space", function() hs.application.launchOrFocus(RAYCAST) end)
-
-_G.Settings = Settings
-_G.Reload = Reload
-_G.HyperMode = HyperMode
+hs.hotkey.bind(HyperKey, "space", function() hs.application.launchOrFocus(RaycastName) end)
+hs.hotkey.bind(HyperKey, "a", function() hyper:toggleHyperMode() end)

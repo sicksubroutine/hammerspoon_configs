@@ -12,7 +12,7 @@ end
 
 function Reload:start()
     print("-- Reload Start initialized")
-    hs.pathwatcher.new(HAMMERSPOON_PATH, function(files)
+    hs.pathwatcher.new(HammerspoonPath, function(files)
         --- @type string[] files
         self:setterFiles(files)
         self:reloadConfig()

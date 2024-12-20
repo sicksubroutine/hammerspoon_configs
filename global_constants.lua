@@ -1,11 +1,22 @@
-HAMMERSPOON_PATH = os.getenv("HOME") .. "/.hammerspoon/"
-LOGGER_FILE_NAME = "__hammerspoon.log"
-DEBUG = true
-RAYCAST = "Raycast"
-HYPERKEY = {"cmd", "ctrl", "alt", "shift"}
+---@diagnostic disable: lowercase-global
+local debug_mode = false
 
-_G.HAMMERSPOON_PATH = HAMMERSPOON_PATH
-_G.LOGGER_FILE_NAME = LOGGER_FILE_NAME
-_G.DEBUG = DEBUG
-_G.RAYCAST = RAYCAST
-_G.HYPERKEY = HYPERKEY
+require("meta.metaGlobals")
+---@class SettingsManager
+debugSettings = SettingsManager():init("debugSettings", debug_mode)
+
+debugSettings:setAll({
+    debug_mode = debug_mode,
+    LoggerFileName = "__hammerspoon.log",
+    HammerspoonPath = os.getenv('HOME') .. '/.hammerspoon/'
+})
+
+__globals__({
+    debugSettings = debugSettings,
+    HammerspoonPath = debugSettings:get("HammerspoonPath"),
+    LoggerFileName = debugSettings:get("LoggerFileName"),
+    DebugMode = debugSettings:get("debug_mode", false),
+    HyperSymbol = "❖",
+    RaycastName = "Raycast",
+    HyperKey = {"cmd", "ctrl", "alt", "shift"}
+})
