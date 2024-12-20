@@ -14,9 +14,10 @@ end
 hs.loadSpoon('EmmyLua')
 require('hs.ipc')
 require("sugar")
-require("dataclass")
+require("classes.dataclass")
 require("settings")
-require("global_constants")
+require("meta.metaGlobals")
+__setGlobals__(require("global_constants"))
 require("logging")
 --[[#################################]]--
 local hyper = require("hypermode")():init()
@@ -28,10 +29,7 @@ if hyper then
 else
     hs.alert.show("Failed to initialize Hyper Mode")
 end
---[[#################################
-#         Keybindings               #
-#       Global Shortcuts            #
-#################################--]]
-hs.hotkey.bind({"cmd", "alt"}, "space", function() hs.application.launchOrFocus("Start") end)
+--[[#################################]]--
+hs.hotkey.bind(CmdAlt, "space", function() hs.application.launchOrFocus("Start") end)
 hs.hotkey.bind(HyperKey, "space", function() hs.application.launchOrFocus(RaycastName) end)
 hs.hotkey.bind(HyperKey, "a", function() hyper:toggleHyperMode() end)

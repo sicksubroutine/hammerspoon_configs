@@ -19,7 +19,7 @@ function Reload:start()
     end):start()
 end
 
----comment
+--- Setter for files
 ---@param files string[] List of files that have changed
 function Reload:setterFiles(files)
     self.files = files

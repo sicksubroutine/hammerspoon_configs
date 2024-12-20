@@ -1,18 +1,16 @@
 ---@diagnostic disable: lowercase-global
+DebugMode = false
 HammerspoonPath = ""
 LoggerFileName = ""
-DebugMode = false
 HyperSymbol = ""
 RaycastName = ""
 HyperKey = {}
+CmdAlt = {}
 
 --- Sets all keys in the table to global variables
 ---@class Globals
----@field debug_mode boolean
----@field LoggerFileName string
----@field HammerspoonPath string
 ---@param t table<string, any>
-function __globals__(t)
+function __setGlobals__(t)
     for key, value in pairs(t) do
         _G[key] = value
     end
