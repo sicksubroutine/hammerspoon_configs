@@ -3,10 +3,7 @@ local connect = require('connection')():init(Settings, DEBUG)
 connect:checkInterfaces()
 connect:start()
 
-local logging = require("logging")
-
-
-
+--local logging = require("logging")
 -- logger = logging:getLogger("__hammerspoon", "debug")
 -- ---@diagnostic disable: lowercase-global
 -- backup_print = print

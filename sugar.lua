@@ -32,5 +32,10 @@ function HumanTimestamp()
   return os.date("%m-%d-%Y %I:%M:%S %p")
 end
 
+function Str(v)
+  return type(v) == "table" and hs.inspect.inspect(v) or tostring(v)
+end
+
 _G.UnixTimestamp = UnixTimestamp
 _G.HumanTimestamp = HumanTimestamp
+_G.str = Str

@@ -1,6 +1,3 @@
--- public functions
-
-
 local class = require("30log")
 
 ---@class Logger

@@ -1,20 +1,20 @@
 -- helpers/hypermode.lua
 ---@diagnostic disable: undefined-field
+---@alias Optional nil
+
 local class = require("30log")
 ---@class Hyper
----@field debug boolean
 ---@field hyperModeActive boolean
 ---@field eventtap hs.eventtap
----@field menubarItem hs.menubar
+---@field menubarItem hs.menubar | Optional
 local Hyper = class({ name = "Hyper" })
 
 --- comment Initialized the Hyper class
---- @param debug boolean
---- @return Hyper
-function Hyper:init(debug)
-    self.debug = debug
+--- @return Hyper | Optional
+function Hyper:init()
     self.hyperModeActive = false
-    self.eventtap = nil
+    self.eventtap = self:returnEventTap()
+    self.eventtap:start()
     self.menubarItem = hs.menubar.new()
     if not self.menubarItem then
         hs.alert.show("Failed to create menubar item")
@@ -22,7 +22,6 @@ function Hyper:init(debug)
     end
     self:updateMenubar()
     print("-- HyperMode Initialized")
-    
     return self
 end
 
@@ -134,42 +133,52 @@ end
 ---@param event hs.eventtap.event
 ---@return boolean
 function Hyper:handleKeyEvent(event)
+    local keyPressed = hs.keycodes.map[event:getKeyCode()]
+    local flags = event:getFlags()
+    
+    -- Add debug logging
+    print("Key pressed: " .. tostring(keyPressed))
+    print("Flags: " .. hs.inspect(flags))
+    print("Hyper Mode Active: " .. tostring(self.hyperModeActive))
+    
+    local hyper_key = compFlags(flags, {"cmd", "alt", "ctrl", "shift"})
+    print("Hyper key match: " .. tostring(hyper_key))
+
     if self.hyperModeActive then
-        local flags = event:getFlags()
-
-        local ctrl, cmd, alt, shift = {ctrl=true}, {cmd=true}, {alt=true}, {shift=true}
-
-        local hyper_key = compFlags(HYPERKEY, flags)
-        print("Hyper Key: " .. tostring(hyper_key))
-        local keyPressed = hs.keycodes.map[event:getKeyCode()]
+        print("Processing active hyper mode key: " .. tostring(keyPressed))
+        
+        if keyPressed == "k" then
+            print("Killing Hammerspoon")
+            hs.alert.show("Killing Hammerspoon")
+            hs.execute("killall Hammerspoon")
+            return true
+        end
 
         if keyPressed == "space" then
+            print("Launching Raycast")
             hs.application.launchOrFocus(RAYCAST)
             self:toggleHyperMode()
             return true
         end
-        if self:hyperKeyChecks(hyper_key, keyPressed) then return true end
+        
+        if self:hyperKeyChecks(hyper_key, keyPressed) then 
+            print("Hyper key check passed")
+            return true 
+        end
 
         if keyPressed == "a" then
+            print("Hyper A pressed")
             hs.alert.show("Hyper A")
-            return true -- Suppress original key
+            return true
         end
     end
+    
+    print("Event not handled")
     return false
 end
 
 function Hyper:startService()
-    if self.eventtap == nil then
-        self.eventtap = Hyper:returnEventTap()
-    end
-    local status, err = pcall(function()
-        self.eventtap:start()
-        self:hyperBind({}, "F17", function() self:toggleHyperMode() end)
-    end)
-    if not status then
-        hs.alert.show("Failed to start service: " .. tostring(err))
-        return false
-    end
+    self.eventtap:start()
     return true
 end
 
