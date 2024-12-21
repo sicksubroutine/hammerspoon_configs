@@ -35,6 +35,8 @@ function Hyper:returnEventTap()
 end
     
 
+--- comment Returns the current mode of the Hyper Mode
+---@return boolean
 function Hyper:getMode()
     return self.hyperModeActive
 end
@@ -86,6 +88,7 @@ function Hyper:createMenu()
     }
 end
 
+---comment Updates the menubar for the Hyper Mode
 function Hyper:updateMenubar()
     if self.menubarItem then
         if self.hyperModeActive then
@@ -106,6 +109,10 @@ function Hyper:hyperBind(modifiers, key, pressedfn, releasedfn)
     hs.hotkey.bind(modifiers, key, pressedfn, releasedfn)
 end
 
+--- Compares the flags to the pattern
+---@param pattern table | nil
+---@param flags table
+---@return boolean
 local function compFlags(pattern, flags)
     if pattern == nil then
         return false
@@ -139,6 +146,9 @@ function Hyper:hyperKeyChecks(key)
     return false
 end
 
+--- Handles key events for when the hyper mode is active
+---@param keyPressed number | string
+---@return boolean
 function Hyper:whileHyperModeActive(keyPressed)
     debugPrint("Processing active hyper mode key: " .. tostring(keyPressed))
     if keyPressed == "a" then
@@ -158,6 +168,7 @@ function Hyper:whileHyperModeActive(keyPressed)
         self:toggleHyperMode()
         return true
     end
+    return false
 end
 
 ---comment Handles the key events for fun and profit
@@ -180,7 +191,7 @@ function Hyper:handleKeyEvent(event)
     end
 
     if self.hyperModeActive then
-        return self:whileHyperModeActive(keyPressed)
+        if self:whileHyperModeActive(keyPressed) then return true end
     end
 
     return false

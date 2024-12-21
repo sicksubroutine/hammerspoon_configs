@@ -17,15 +17,7 @@ local function interp(s, tab)
     end))
   end
 
-getmetatable("").__mod = interp
-
-local function LoadAndCheck(moduleName)
-    local ok, module = pcall(function() return require(moduleName) end)
-    if not ok then print("Failed to load module:", moduleName, "Error:", module) hs.alert.show("Failed to load module: " .. moduleName) return nil end
-    if type(module) ~= "table" then print("Module "..moduleName.." loaded but returned unexpected type:", type(module)) return nil end
-    print("Module loaded successfully:", moduleName)
-    return module 
-end
+getmetatable("").__mod = interp -- probably not using this anyway lol
 
 function UnixTimestamp()
   return os.time()
@@ -39,7 +31,9 @@ function Str(v)
   return type(v) == "table" and hs.inspect.inspect(v) or tostring(v)
 end
 
-_G.UnixTimestamp = UnixTimestamp
-_G.HumanTimestamp = HumanTimestamp
-_G.str = Str
-_G.debugPrint = debugPrint
+__setGlobals__({
+  UnixTimestamp = UnixTimestamp,
+  HumanTimestamp = HumanTimestamp,
+  str = Str,
+  debugPrint = debugPrint
+})

@@ -1,4 +1,5 @@
 ---@diagnostic disable: lowercase-global
+require("meta.metaGlobals")
 local logging = require("logging")
 logger = logging:getLogger("__hammerspoon", "debug")
 
@@ -16,7 +17,7 @@ require('hs.ipc')
 require("sugar")
 require("classes.dataclass")
 require("settings")
-require("meta.metaGlobals")
+
 __setGlobals__(require("global_constants"))
 require("logging")
 --[[#################################]]--
