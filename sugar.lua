@@ -23,8 +23,16 @@ function UnixTimestamp()
   return os.time()
 end
 
-function HumanTimestamp()
-  return os.date("%m-%d-%Y %I:%M:%S %p")
+function HumanTimestamp(option)
+  -- date, time, both
+  -- if nothing is passed, return both
+  if option == "date" then
+    return os.date("%m-%d-%Y")
+  elseif option == "time" then
+    return os.date("%I:%M:%S %p")
+  else
+    return os.date("%m-%d-%Y %I:%M:%S %p")
+  end
 end
 
 function Str(v)

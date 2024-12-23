@@ -4,7 +4,7 @@ local class = require("30log")
 --- @field settings SettingsManager
 local Connection = class({name="Connection"})
 
-local WAIT_TIME = 30
+local WAIT_TIME = 15
 
 ---comment Initializes the Connection class
 ---@param settings SettingsManager
@@ -18,7 +18,7 @@ function Connection:init(settings, debug)
     self.debug = debug
     self.wifi = self.settings:get("wifi", false)
     self.ethernet = self.settings:get("ethernet", false)
-    print("Debug: ${s.debug}, WiFi: ${s.wifi}, Ethernet: ${s.ethernet}" % {s=self})
+    print("-- Debug: ${s.debug}, WiFi: ${s.wifi}, Ethernet: ${s.ethernet}" % {s=self})
     return self
 end
 
@@ -137,17 +137,10 @@ end
 
 --- Starts the timer to check the interfaces
 function Connection:start()
-    local timer = hs.timer.doEvery(WAIT_TIME, function()
-        local current_time = UnixTimestamp()
-        local last_checked = self.settings:get("last_checked", 0)
-        local time_diff = os.difftime(current_time, last_checked)
-        
-        Connection:p_debug(string.format("Timer Tick - Current Time: %d, Last Checked: %d, Time Diff: %d",
-        current_time, last_checked, time_diff))
-        
-        if time_diff >= WAIT_TIME * 2 then print("Long time since last check, forcing reset") self:resetState() end
-        self:checkInterfaces()
-    end)
+    local current_time = HumanTimestamp()
+    print("-- "..tostring(current_time).." Checking interfaces...")
+    self:checkInterfaces()
+    hs.timer.doAfter(WAIT_TIME, function() self:start() end)
 end
 
 

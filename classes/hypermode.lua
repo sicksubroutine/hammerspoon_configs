@@ -136,11 +136,12 @@ function Hyper:hyperKeyChecks(key)
         hs.reload()
         return true
     elseif key == "n" then
-        hs.alert.show("Rebuilding NixOS Configuration, please standby...")
-        hs.execute("open ~/.hammerspoon/__hammerspoon.log")
+        hs.alert.show("Rebuilding Nix Darwin Configuration, please standby...")
+        --hs.execute("open ~/.hammerspoon/__hammerspoon.log")
+        local cmd = "darwin-rebuild switch --flake ~/.config/nix/#pluto"
         hs.timer.doAfter(1, function()
-            local output, _, _ = hs.execute("darwin-rebuild switch --flake ~/.config/nix/#pluto", true)
-            logger:debug(output)
+            local output, _, _ = hs.execute(cmd, true)
+            logger:debug("Debug output for Nix Rebuild"..output)
         end)
         return true
     elseif key == "s" then
