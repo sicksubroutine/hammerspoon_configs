@@ -21,7 +21,7 @@ require("settings")
 __setGlobals__(require("global_constants"))
 require("logging")
 --[[#################################]]--
-local hyper = require("hypermode")():init()
+local hyper = require("classes.hypermode")():init()
 if hyper then
     hs.alert.show("HyperMode Initialized")
     hs.hotkey.bind({}, "F17", function()

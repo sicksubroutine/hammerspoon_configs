@@ -1,6 +1,6 @@
 require("_load")
-local reload = require("reload")
-if reload then reload():init():start() end
+local reload = require("reload")():init()
+if reload then reload:start() end
 local connect = require('connection')():init(SettingsManager, DebugMode)
 connect:checkInterfaces()
 connect:start()

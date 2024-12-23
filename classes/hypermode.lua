@@ -142,6 +142,12 @@ function Hyper:hyperKeyChecks(key)
             local output, _, _ = hs.execute("darwin-rebuild switch --flake ~/.config/nix/#pluto", true)
             logger:debug(output)
         end)
+        return true
+    elseif key == "s" then
+        hs.timer.doAfter(0.1, function()
+            local output, _, _ = hs.execute("sketchybar --reload", true)
+        end)
+        return true
     end
     return false
 end
