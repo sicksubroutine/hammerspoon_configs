@@ -7,6 +7,13 @@ RaycastName = ""
 HyperKey = {}
 CmdAlt = {}
 
+-- Global Function Stubs for type checking
+str = function(string)end
+debugPrint = function(string)end
+readFile = function()end
+UnixTimestamp = function()end
+humanTimestamp = function(time)end
+
 --- Sets all keys in the table to global variables
 ---@class Globals
 ---@param t table<string, any>

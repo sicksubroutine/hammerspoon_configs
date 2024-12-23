@@ -137,7 +137,7 @@ end
 
 --- Starts the timer to check the interfaces
 function Connection:start()
-    local current_time = HumanTimestamp()
+    local current_time = humanTimestamp()
     print("-- "..tostring(current_time).." Checking interfaces...")
     self:checkInterfaces()
     hs.timer.doAfter(WAIT_TIME, function() self:start() end)

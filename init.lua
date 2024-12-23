@@ -2,9 +2,10 @@ require("_load")
 local reload = require("reload")()
 if reload:init() then reload:start() end
 local connect = require('classes.connection')()
-connect:init(SettingsManager, DebugMode)
-connect:start()
-
+if ConnectionMode == "on" then
+    connect:init(SettingsManager, DebugMode)
+    connect:start()
+end
 hs.alert.show("Config loaded")
-local now = HumanTimestamp("time")
+local now = humanTimestamp("time")
 print("-- Reached the end of the config at "..tostring(now))

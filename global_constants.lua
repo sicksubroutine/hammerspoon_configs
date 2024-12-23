@@ -1,11 +1,8 @@
----@diagnostic disable: lowercase-global
-local debug_mode = false
-
 ---@class SettingsManager
-debugSettings = SettingsManager():init("debugSettings", debug_mode)
+debugSettings = SettingsManager():init("debugSettings", JDebugMode)
 
 debugSettings:setAll({
-    debug_mode = debug_mode,
+    debug_mode = JDebugMode,
     LoggerFileName = "__hammerspoon.log",
     HammerspoonPath = os.getenv('HOME') .. '/.hammerspoon/'
 })
