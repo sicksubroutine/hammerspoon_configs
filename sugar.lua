@@ -1,4 +1,5 @@
-local function debugPrint(...)
+---@diagnostic disable: lowercase-global
+function debugPrint(...)
     if DebugMode then print(...) end
 end
 
