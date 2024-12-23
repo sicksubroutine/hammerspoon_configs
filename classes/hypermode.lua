@@ -9,10 +9,18 @@ local class = require("30log")
 ---@field menubarItem hs.menubar | Optional
 local Hyper = class({ name = "Hyper" })
 
+---@class HyperCommand
+---@field name string
+---@field key string
+---@field action function
+---@field showInMenu boolean
+---@field menuTitle string|nil
+
 --- comment Initialized the Hyper class
 --- @return Hyper | Optional
 function Hyper:init()
     self.hyperModeActive = false
+    self.commands = {}
     self.eventtap = self:returnEventTap()
     self.eventtap:start()
     self.menubarItem = hs.menubar.new()
@@ -23,6 +31,16 @@ function Hyper:init()
     self:updateMenubar()
     print("-- HyperMode Initialized")
     return self
+end
+
+function Hyper:registerCommand(name, key, action, showInMenu, menuTitle)
+    self.commands[key] = {
+        name = name,
+        key = key,
+        action = action,
+        showInMenu = showInMenu or false,
+        menuTitle = menuTitle or name
+    }
 end
 
 --- comment Returns the event tap for the Hyper Mode
@@ -41,6 +59,17 @@ function Hyper:getMode()
     return self.hyperModeActive
 end
 
+---comment Sets the mode of the Hyper Mode
+---@param value boolean
+function Hyper:setMode(value)
+    if value == false then
+        self.hyperModeActive = false
+    else
+        self.hyperModeActive = true
+    end
+    self:updateMenubar()
+end
+
 function Hyper:toggleHyperMode()
     self.hyperModeActive = not self.hyperModeActive
     if self.hyperModeActive then
@@ -48,7 +77,6 @@ function Hyper:toggleHyperMode()
     else
         hs.alert.show("Hyper Mode Deactivated")
     end
-
     self:updateMenubar()
 end
 
@@ -56,36 +84,28 @@ end
 ---comment Creates the menubar for the Hyper Mode
 ---@return table
 function Hyper:createMenu()
-    local __separator__ = { title = "-" }
-    return {
-        -- Show current state
+    local menu = {
         {
             title = "Status: " .. (self.hyperModeActive and "Hyper Mode Active 🔴" or "Hyper Mode Inactive ⚪"),
             fn = function() self:toggleHyperMode() end
         },
-        __separator__,
+        { title = "-" },
         {
             title = "Available Commands:",
             disabled = true
-        },
-        {
-            title = "❖ + N: Rebuild NixOS Configuration",
-            fn = function() end
-        },
-        {
-            title = "❖ + Space: Launch Raycast",
-            fn = function() hs.application.launchOrFocus(RaycastName) end
-        },
-        {
-            title = "Launch Start Applications",
-            fn = function() hs.application.launchOrFocus("Start") end
-        },
-        __separator__,
-        {
-            title = "Reload Configuration",
-            fn = function() hs.reload() end
         }
     }
+    
+    for _, command in pairs(self.commands) do
+        if command.showInMenu then
+            table.insert(menu, {
+                title = command.menuTitle,
+                fn = command.action
+            })
+        end
+    end
+    
+    return menu
 end
 
 ---comment Updates the menubar for the Hyper Mode
@@ -98,15 +118,6 @@ function Hyper:updateMenubar()
         end
     end
     self.menubarItem:setMenu(self:createMenu())
-end
-
----comment Passthrough for hs.hotkey.bind
----@param modifiers table
----@param key string
----@param pressedfn any
----@param releasedfn any
-function Hyper:hyperBind(modifiers, key, pressedfn, releasedfn)
-    hs.hotkey.bind(modifiers, key, pressedfn, releasedfn)
 end
 
 --- Compares the flags to the pattern
@@ -192,15 +203,20 @@ function Hyper:handleKeyEvent(event)
         print("Hyper Mode Active: " .. tostring(self.hyperModeActive))
         print("Hyper key match: " .. tostring(hyperKey))
     end
-
-    if hyperKey then
-        return self:hyperKeyChecks(keyPressed)
+    
+    if hyperKey or self.hyperModeActive then
+        return self:executeCommand(keyPressed)
     end
+    
+    return false
+end
 
-    if self.hyperModeActive then
-        if self:whileHyperModeActive(keyPressed) then return true end
+function Hyper:executeCommand(key)
+    local command = self.commands[key]
+    if command then
+        command.action()
+        return true
     end
-
     return false
 end
 

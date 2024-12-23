@@ -6,5 +6,5 @@ connect:init(SettingsManager, DebugMode)
 connect:start()
 
 hs.alert.show("Config loaded")
-local now = dt.now("time")
+local now = HumanTimestamp("time")
 print("-- Reached the end of the config at "..tostring(now))

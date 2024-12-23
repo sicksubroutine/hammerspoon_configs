@@ -30,6 +30,8 @@ if hyper then
 else
     hs.alert.show("Failed to initialize Hyper Mode")
 end
+_G.hyper = hyper
+require("commands")
 --[[#################################]]--
 hs.hotkey.bind(CmdAlt, "space", function() hs.application.launchOrFocus("Start") end)
 hs.hotkey.bind(HyperKey, "space", function() hs.application.launchOrFocus(RaycastName) end)

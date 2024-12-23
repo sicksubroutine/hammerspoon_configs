@@ -4,7 +4,7 @@ local class = require("30log")
 --- @field settings SettingsManager
 local Connection = class({name="Connection"})
 
-local WAIT_TIME = 15
+local WAIT_TIME = 60
 
 ---comment Initializes the Connection class
 ---@param settings SettingsManager
