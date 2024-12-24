@@ -1,4 +1,7 @@
 ---@diagnostic disable: lowercase-global
+---@class DataClass
+---@field fields function
+---@field to_table function
 local class = require('classes.30log')
 
 function dataclass(class_name, fields)
@@ -12,10 +15,29 @@ function dataclass(class_name, fields)
         for field_name, field_def in pairs(fields) do
             local value = data[field_name]
             
+            -- Use default if value is nil
+            if value == nil and field_def.default ~= nil then
+                value = field_def.default
+            end
+            
             -- Type checking
             if value ~= nil and type(value) ~= field_def.type then
-                error(string.format("Field %s must be of type %s, got %s", 
-                    field_name, field_def.type, type(value)))
+                error("Field ${field} must be of type ${expected}, got ${actual}" % {
+                    field = field_name,
+                    expected = field_def.type,
+                    actual = type(value)
+                })
+            end
+            
+            -- Validation if provided
+            if value ~= nil and field_def.validate then
+                local valid, msg = field_def.validate(value)
+                if not valid then
+                    error("Validation failed for ${field}: ${msg}" % {
+                        field = field_name,
+                        msg = msg or "invalid value"
+                    })
+                end
             end
             
             self[field_name] = value
@@ -23,34 +45,70 @@ function dataclass(class_name, fields)
         return self
     end
 
+    -- Get all field names
+    function NewClass:fields()
+        return fields
+    end
+
+    -- Convert to plain table
+    function NewClass:to_table()
+        local t = {}
+        for field_name, _ in pairs(fields) do
+            t[field_name] = self[field_name]
+        end
+        return t
+    end
+
+    -- From table (class method)
+    function NewClass.from_table(t)
+        return NewClass(t)
+    end
+
     
     function NewClass:__tostring()
         local parts = {}
-        for field_name, _ in pairs(fields) do
-            table.insert(parts, string.format("%s=%s", 
-                field_name, tostring(self[field_name])))
+        for field_name, field_def in pairs(fields) do
+            -- Skip fields marked as hidden
+            if not field_def.hidden then
+                table.insert(parts, "${field}=${value}" % {
+                    field = field_name,
+                    value = tostring(self[field_name])
+                })
+            end
         end
-        return string.format("%s(%s)", class_name, table.concat(parts, ", "))
+        return "${class_name}(${fields})" % {
+            class_name = class_name,
+            fields = table.concat(parts, ", ")
+        }
     end
 
     function NewClass:__repr()
         local parts = {}
         for field_name, field_def in pairs(fields) do
-            local value = self[field_name]
-            -- More detailed formatting based on type
-            if type(value) == "string" then
-                value = string.format("%q", value)  -- Adds quotes
-            elseif type(value) == "nil" then
-                value = "nil"
-            elseif type(value) == "table" then
-                value = "table:" .. tostring(value)
+            -- Skip hidden fields unless they're system fields (start with _)
+            if not field_def.hidden or field_name:match("^_") then
+                local value = self[field_name]
+                -- More detailed formatting based on type
+                if type(value) == "string" then
+                    value = string.format("%q", value)
+                elseif type(value) == "nil" then
+                    value = "nil"
+                elseif type(value) == "table" then
+                    value = "table:" .. tostring(value)
+                end
+
+                table.insert(parts, "${field}<${type}>=${value}" % {
+                    field = field_name,
+                    type = field_def.type,
+                    value = value
+                })
             end
-            table.insert(parts, string.format("%s<%s>=%s", 
-                field_name,
-                field_def.type,  -- Show the field's type
-                tostring(value)))
         end
-        return string.format("%s{%s}", class_name, table.concat(parts, ", "))
+
+        return "${class_name}{${fields}}" % {
+            class_name = class_name,
+            fields = table.concat(parts, ", ")
+        }
     end
 
     function NewClass:__eq(other)
@@ -110,47 +168,4 @@ function dataclass(class_name, fields)
     return NewClass
 end
 
-_G.dataclass = dataclass
-
-
--- local Person = dataclass("Person", {
---     name = {type = "string"},
---     age = {type = "number"},
---     email = {type = "string"}
--- })
-
--- local person1 = Person({name = "Alice", age = 30, email = "alice@diagnostic.com"})
--- local person2 = Person({name = "Alice", age = 30, email = "alice@diagnostic.com"})
-
--- -- __tostring
--- print("\n__tostring test:")
--- print("person1:", person1)
--- print("person2:", person2)
-
--- -- __repr
--- print("\n__repr test:")
--- print("person1 repr:", person1:__repr())
--- print("person2 repr:", person2:__repr())
-
--- -- __eq
--- print("\n__eq tests:")
--- print("person1 == person2:", person1 == person2)
--- local person3 = Person({name = "Alice", age = 30, email = "alice@diagnostic.com"})
--- print("person1 == person3 (should be true):", person1 == person3)
-
--- -- __lt
--- print("\n__lt test:")
--- print("person1 < person2:", person1 < person2)
-
--- -- __le
--- print("\n__le tests:")
--- print("person1 <= person2:", person1 <= person2)
--- print("person1 <= person3:", person1 <= person3)
-
--- -- __add
--- print("\n__add test:")
--- print("person1 + person2:", person1 + person2)
-
--- -- __len
--- print("\n__len test:")
--- print("Length of person1 (#person1):", #person1)
+_G.dataclass = function(...) return dataclass(...) end

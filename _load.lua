@@ -1,24 +1,16 @@
 --[[#################################]]--
 --[[##### Load Libraries ###########]]--
 ---@diagnostic disable: lowercase-global, need-check-nil
-require("meta.globals")
 require("classes.data_structures.dictionary")
-require("helpers")
 require("classes.lines")
 require("classes.pathlib")
 require("classes.lines")
 require("classes.json_help")
 jSettings = jsonI(Path("~/.hammerspoon/settings.json"), "jSettings")
 jData = jSettings:getData() --{"connect": false, "hyper": true, "debug": false, "clear": true}
--- print(
---     "-- jSettings:"..
---     " Debug:".. jSettings:getStr("debug", "false")..
---     ", Hyper:".. jSettings:getStr("hyper", "false")..
---     ", Connect:".. jSettings:getStr("connect", "false")..
---     ", Clear:".. jSettings:getStr("clear", "false")
--- )
 print(jSettings:pretty(", "))
 __setGlobals__({jSettings = jSettings, jData = jData})
+__setGlobals__(require("global_constants"))
 logger = require("logging"):getLogger("__hammerspoon", "debug")
 local bPrint = print
 _G.print = function(...)
@@ -29,12 +21,11 @@ _G.print = function(...)
 end
 hs.loadSpoon('EmmyLua')
 require('hs.ipc')
---require("classes.dataclass")
-require("settings")
+require("classes.dataclass")
+
 local reload = require("reload")()
 if reload then reload:start() end
 require("classes.datetime")
-__setGlobals__(require("global_constants"))
 --[[#################################]]--
 --[[##### Keyboard Related ##########]]--
 hs.hotkey.bind(CmdAlt, "space", function() hs.application.launchOrFocus("Start") end)
