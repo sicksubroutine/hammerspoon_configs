@@ -3,6 +3,7 @@ local reload = require("reload")()
 if reload:init() then reload:start() end
 local connect = require('classes.connection')()
 if ConnectionMode == "on" then
+    print("-- Connection Mode is on")
     connect:init(SettingsManager, DebugMode)
     connect:start()
 end

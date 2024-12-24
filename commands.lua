@@ -1,11 +1,22 @@
+-- function Hyper:registerCommand(name, key, action, showInMenu, menuTitle)
+--     self.commands[key] = {
+--         name = name,
+--         key = key,
+--         action = action,
+--         showInMenu = showInMenu or false,
+--         menuTitle = menuTitle or name
+--     }
+-- end
+
+
 hyper:registerCommand(
-        "Toggle Hyper Mode",
-        "a",
-        function() hyper:toggleHyperMode() end,
-        true,
-        "❖ + A: Toggle Hyper Mode"
-    )
-    
+    "Toggle Hyper Mode",
+    "a",
+    function() hyper:toggleHyperMode() end,
+    true,
+    "❖ + A: Toggle Hyper Mode"
+)
+
 hyper:registerCommand(
     "Reload Configuration",
     "r",
@@ -13,7 +24,7 @@ hyper:registerCommand(
     true,
     "❖ + R: Reload Configuration"
 )
-    
+
 hyper:registerCommand(
     "Rebuild NixOS",
     "n",
@@ -28,7 +39,27 @@ hyper:registerCommand(
     true,
     "❖ + N: Rebuild NixOS Configuration"
 )
-    
+
+hyper:registerCommand(
+    "Debug Mode Toggle",
+    "d",
+    function()
+        JDebugMode = not JDebugMode
+        local temp_data = jData
+        jData.debug = JDebugMode and "on" or "off"
+        jSettings:setData(temp_data)
+        jSettings:write()
+        local debug = jData.debug and jData.debug == "on" or false
+        if debug then hs.alert.show("Debug Mode is on") else hs.alert.show("Debug Mode is off") end
+        -- wait a second
+        hs.timer.doAfter(1, function()
+            hs.reload()
+        end)
+    end,
+    true,
+    "❖ + D: Toggle Debug Mode"
+)
+
 hyper:registerCommand(
     "Launch Raycast",
     "space",

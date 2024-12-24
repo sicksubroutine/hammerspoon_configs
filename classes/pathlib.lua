@@ -32,6 +32,7 @@ local lines = require("classes.lines")
 ---@field public writeLines fun(self: Path, lines: string[]): boolean
 ---@field public append fun(self: Path, content: string): boolean
 ---@field public str fun(self: Path): string
+---@field public createPath fun(self: Path, path: string): Path
 
 local Path = class({ name = "Path" })
 
@@ -227,4 +228,11 @@ function Path:str()
     return self.path
 end
 
-_G.Path = Path
+---Returns a new instance of Path
+---@param path string
+---@return Path
+function Path:createPath(path)
+    return Path():init(path)
+end
+
+_G.Path = function(path) return Path():createPath(path) end

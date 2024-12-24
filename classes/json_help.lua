@@ -4,7 +4,9 @@ local class = require("30log")
 ---@field private json_path Path
 ---@field private data table|nil
 ---@field public init fun(self: JsonHelp, json_path: Path): JsonHelp
+---@field public setData fun(self: JsonHelp, data: table|nil)
 ---@field public getData fun(self: JsonHelp): table|nil
+---@field public get fun(self: JsonHelp, key): string
 ---@field public read fun(self: JsonHelp): table|nil
 ---@field public write fun(self: JsonHelp): boolean
 ---@field public loads fun(self: JsonHelp, json_string: string): table|nil
@@ -22,10 +24,25 @@ function JsonHelp:init(json_path)
     return self
 end
 
+---Sets the data
+---@param data table|nil
+function JsonHelp:setData(data)
+    if not data then return end
+    self.data = data
+end
+
 ---Returns the data
 ---@return table
 function JsonHelp:getData()
     return self.data
+end
+
+---Returns the value of the key
+---@param key string
+---@return string
+function JsonHelp:get(key)
+    if not self.data then return "" end
+    return self.data[key]
 end
 
 ---Reads the file and returns the content as a table
@@ -75,8 +92,9 @@ end
 --- @return JsonHelp | nil
 function JsonHelp:getInstance(path)
     local instance = JsonHelp():init(path)
-    if not instance:getData() then return nil end
+    if not instance then return nil end
     return instance
 end
 
 _G.json = function(path) return JsonHelp:json(path) end
+_G.jsonI = function(path) return JsonHelp:getInstance(path) end

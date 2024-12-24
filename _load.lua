@@ -4,13 +4,15 @@ require("classes.pathlib")
 require("classes.lines")
 require("classes.json_help")
 local logging = require("logging")
-jSettings = json(Path():init("~/.hammerspoon/settings.json")) --{"connect": "off", "hyper": "on", "debug": "off"}
+jSettings = jsonI(Path("~/.hammerspoon/settings.json"))
+jData = jSettings:getData() --{"connect": "off", "hyper": "on", "debug": "off"}
 ---@type string
-ConnectionMode = jSettings.connect -- "on" or "off"
+ConnectionMode = jData.connect -- "on" or "off"
 ---@type string
-HyperMode = jSettings.hyper -- "on" or "off"
+HyperMode = jData.hyper -- "on" or "off"
 ---@type boolean
-JDebugMode = jSettings.debug == "on" -- true or false
+JDebugMode = jData.debug and jData.debug == "on" or false
+if JDebugMode then print("-- Debug Mode is on") end
 logger = logging:getLogger("__hammerspoon", "debug")
 local bPrint = print
 _G.print = function(...)
@@ -29,6 +31,7 @@ dt = require("classes.datetime")
 __setGlobals__(require("global_constants"))
 --[[#################################]]--
 if HyperMode == "on" then
+    print("-- Hyper Mode is on")
     local hyper = require("classes.hypermode")():init()
     if hyper then
         hs.alert.show("HyperMode Initialized")
