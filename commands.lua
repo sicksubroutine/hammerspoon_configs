@@ -41,15 +41,25 @@ hyper:registerCommand(
 )
 
 hyper:registerCommand(
+    "Launch Raycast",
+    "space",
+    function()
+        hs.application.launchOrFocus("Start")
+        hyper.setMode(false)
+    end,
+    true,
+    "❖ + Space: Launch Raycast"
+)
+
+hyper:registerCommand(
     "Debug Mode Toggle",
     "d",
     function()
-        JDebugMode = not JDebugMode
         local temp_data = jData
-        jData.debug = JDebugMode and "on" or "off"
+        temp_data.debug = not temp_data.debug
         jSettings:setData(temp_data)
-        jSettings:write()
-        local debug = jData.debug and jData.debug == "on" or false
+        jSettings:write(true)
+        local debug = jSettings:get("debug")
         if debug then hs.alert.show("Debug Mode is on") else hs.alert.show("Debug Mode is off") end
         -- wait a second
         hs.timer.doAfter(1, function()
@@ -61,14 +71,17 @@ hyper:registerCommand(
 )
 
 hyper:registerCommand(
-    "Launch Raycast",
-    "space",
+    "Clear Log",
+    "c",
     function()
-        hs.application.launchOrFocus("Start")
-        hyper.setMode(false)
+        logger:clear()
+        hs.alert.show("Log Cleared")
+        hs.timer.doAfter(1, function()
+            hs.reload()
+        end)
     end,
     true,
-    "❖ + Space: Launch Raycast"
+    "❖ + C: Clear Log"
 )
 
 hyper:updateMenubar()

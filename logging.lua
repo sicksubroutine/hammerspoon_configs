@@ -9,6 +9,19 @@ local class = require("30log")
 ---@field private buffer_size number
 ---@field private last_flush number
 ---@field private flush_interval number
+---@field private max_buffer number
+---@field public init fun(self: Logger, logname: string, log_level: string): Logger
+---@field public start fun(self: Logger): boolean
+---@field public close fun(self: Logger)
+---@field public flush fun(self: Logger)
+---@field public clear fun(self: Logger)
+---@field private _log fun(self: Logger, level: string, message: string)
+---@field public info fun(self: Logger, ...: any)
+---@field public error fun(self: Logger, ...: any)
+---@field public warning fun(self: Logger, ...: any)
+---@field public debug fun(self: Logger, ...: any)
+---@field public getLogger fun(name: string, log_level: string): Logger | nil
+---@return Logger
 local Logger = class({name="Logger"})
 
 function Logger:init(logname, log_level)
@@ -46,6 +59,13 @@ function Logger:close()
         self.logfile:close()
         self.logfile = nil
     end
+end
+
+function Logger:clear()
+    if self.logfile then
+        self:close()
+    end
+    os.remove(self.logpath .. self.logname)
 end
 
 function Logger:flush()

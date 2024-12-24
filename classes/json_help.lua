@@ -6,11 +6,11 @@ local class = require("30log")
 ---@field public init fun(self: JsonHelp, json_path: Path): JsonHelp
 ---@field public setData fun(self: JsonHelp, data: table|nil)
 ---@field public getData fun(self: JsonHelp): table|nil
----@field public get fun(self: JsonHelp, key): string
+---@field public get fun(self: JsonHelp, key, default:any|nil): string
 ---@field public read fun(self: JsonHelp): table|nil
----@field public write fun(self: JsonHelp): boolean
+---@field public write fun(self: JsonHelp, prettyprint: boolean|nil): boolean
 ---@field public loads fun(self: JsonHelp, json_string: string): table|nil
----@field public dumps fun(self: JsonHelp, data: table, prettyprint: boolean): string
+---@field public dumps fun(self: JsonHelp, data: table|nil, prettyprint: boolean): string
 ---@field public json fun(self: JsonHelp, path: Path): table|nil
 ---@field public getInstance fun(self: JsonHelp, path: Path): JsonHelp|nil
 local JsonHelp = class({ name = "JsonHelp" })
@@ -39,9 +39,10 @@ end
 
 ---Returns the value of the key
 ---@param key string
----@return string
-function JsonHelp:get(key)
-    if not self.data then return "" end
+---@param default any|nil
+---@return string|nil
+function JsonHelp:get(key, default)
+    if not self.data or not self.data[key] then return default end
     return self.data[key]
 end
 
@@ -56,9 +57,11 @@ function JsonHelp:read()
 end
 
 ---Writes the data to the file
+---@param prettyprint boolean|nil
 ---@return boolean
-function JsonHelp:write()
-    local text = hs.json.encode(self.data)
+function JsonHelp:write(prettyprint)
+    if not prettyprint then prettyprint = false end
+    local text = hs.json.encode(self.data, prettyprint)
     if not text then return false end
     self.json_path:write_text(text)
     return true
@@ -70,12 +73,13 @@ function JsonHelp:loads(json_string)
 end
 
 ---Converts the data to a json string, prettyprint is optional
----@param data table
+---@param data table|nil
 ---@param prettyprint boolean
 ---@return string
 function JsonHelp:dumps(data, prettyprint)
-    local text = hs.json.encode(data, prettyprint)
-    return text
+    if not data then return "{}" end
+    if not prettyprint then prettyprint = false end
+    return hs.json.encode(data, prettyprint)
 end
 
 --- Returns a table from a json file

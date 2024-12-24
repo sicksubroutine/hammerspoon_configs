@@ -1,5 +1,5 @@
 local class = require("30log")
-local lines = require("classes.lines")
+
 
 ---@class Path
 ---@field private path string
@@ -196,7 +196,7 @@ end
 ---@return Lines | nil
 function Path:readLines()
     if not self._exists then return nil end
-    local lines = lines.fromFile(self)
+    local lines = Lines.fromFile(self)
     return lines
 end
 

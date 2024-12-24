@@ -9,10 +9,10 @@ CmdAlt = {}
 
 -- Global Function Stubs for type checking
 str = function(string)end
-debugPrint = function(string)end
+debugPrint = function(...)end
 readFile = function()end
+--- Returns the current Unix timestamp
 UnixTimestamp = function()end
-humanTimestamp = function(time)end
 
 --- Sets all keys in the table to global variables
 ---@class Globals

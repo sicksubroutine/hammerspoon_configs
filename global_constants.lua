@@ -1,8 +1,10 @@
+local debug = jSettings:get("debug", false)
+
 ---@class SettingsManager
-debugSettings = SettingsManager():init("debugSettings", JDebugMode)
+debugSettings = SettingsManager():init("debugSettings", debug)
 
 debugSettings:setAll({
-    debug_mode = JDebugMode,
+    debug_mode = debug,
     LoggerFileName = "__hammerspoon.log",
     HammerspoonPath = os.getenv('HOME') .. '/.hammerspoon/'
 })

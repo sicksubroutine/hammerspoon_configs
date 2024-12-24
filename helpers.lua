@@ -28,20 +28,7 @@ local function unixTimestamp()
   return os.time()
 end
 
-local function humanTimestamp(option)
-  -- date, time, both
-  -- if nothing is passed, return both
-  if option == "date" then
-    return os.date("%m-%d-%Y")
-  elseif option == "time" then
-    return os.date("%I:%M:%S %p")
-  else
-    return os.date("%m-%d-%Y %I:%M:%S %p")
-  end
-end
-local function str(v)
-  return type(v) == "table" and hs.inspect.inspect(v) or tostring(v)
-end
+_G.str = tostring
 
 local function readFile(path)
   
@@ -62,7 +49,6 @@ end
 
 __setGlobals__({
   unixTimestamp = unixTimestamp,
-  humanTimestamp = humanTimestamp,
   str = str,
   debugPrint = debugPrint,
   readFile = readFile
