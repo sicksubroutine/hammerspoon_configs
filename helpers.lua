@@ -1,9 +1,13 @@
+--- Tries to define an easier way to create strings with variables
+---@param s string
+---@param tab table
+---@return string
+---@usage print("Hello, ${name}! You are ${age} years old." % {name="John", age=30})
 local function interp(s, tab)
 -- Example of usage:
 -- local name = "John"
 -- local age = 30
--- local sentence = "My name is ${name} and I am ${age} years old."
--- print(sentence % {name=name, age=age})
+-- print("Hello, ${name}! You are ${age} years old." % {name=name, age=age})
     return (s:gsub('${([%w.]+)}', function(w)
       local keys = {}
       for key in w:gmatch('[^.]+') do table.insert(keys, key) end

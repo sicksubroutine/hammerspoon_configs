@@ -3,25 +3,30 @@ local class = require("30log")
 ---@class JsonHelp
 ---@field private json_path Path
 ---@field private data table|nil
----@field public init fun(self: JsonHelp, json_path: Path): JsonHelp
+---@field private name string|nil
+---@field public init fun(self: JsonHelp, json_path: Path, name: string|nil): JsonHelp
+---@field public getInstance fun(self: JsonHelp, path: Path, name: string): JsonHelp|nil
+---@field public instanceGetter fun(self: JsonHelp, path: Path, name: string): JsonHelp|nil
+---@field public pretty fun(self: JsonHelp, sep: string|nil): string
 ---@field public setData fun(self: JsonHelp, data: table|nil)
 ---@field public getData fun(self: JsonHelp): table|nil
 ---@field public get fun(self: JsonHelp, key, default:any|nil): string
----@field public getString fun(self: JsonHelp, key: string, default:any|nil): string
+---@field public getStr fun(self: JsonHelp, key: string, default:any|nil): string
 ---@field public read fun(self: JsonHelp): table|nil
 ---@field public write fun(self: JsonHelp, prettyprint: boolean|nil): boolean
 ---@field public loads fun(self: JsonHelp, json_string: string): table|nil
 ---@field public dumps fun(self: JsonHelp, data: table|nil, prettyprint: boolean): string
 ---@field public json fun(self: JsonHelp, path: Path): table|nil
----@field public getInstance fun(self: JsonHelp, path: Path): JsonHelp|nil
 local JsonHelp = class({ name = "JsonHelp" })
 
---- Initializes the JsonHelp class
+---Initialize JsonHelp instance
 ---@param json_path Path
+---@param name string|nil
 ---@return JsonHelp
-function JsonHelp:init(json_path)
+function JsonHelp:init(json_path, name)
     self.json_path = json_path
     self.data = self:read()
+    self.name = name
     return self
 end
 
@@ -51,9 +56,35 @@ end
 ---@param key string
 ---@param default any|nil
 ---@return string|nil
-function JsonHelp:getString(key, default)
+function JsonHelp:getStr(key, default)
     if not self.data or not self.data[key] then return tostring(default) end
     return tostring(self.data[key])
+end
+
+---Returns a pretty version of the self.data done in a specific format
+---@param sep string|nil -- the separator, default is "\n"
+---@return string
+function JsonHelp:pretty(sep)
+    if not sep then sep = "\n" end
+    local prettyStr = "${name}(" % {name = self.name}
+    local count = 0
+    local total = 0
+    
+    -- Get total entries
+    for _ in pairs(self.data) do
+        total = total + 1
+    end
+    
+    -- Build string
+    for k, v in pairs(self.data) do
+        count = count + 1
+        prettyStr = prettyStr .. k .. ": " .. tostring(v)
+        if count < total then
+            prettyStr = prettyStr .. sep
+        end
+    end
+    prettyStr = prettyStr .. ")"
+    return prettyStr
 end
 
 ---Reads the file and returns the content as a table
@@ -62,8 +93,9 @@ function JsonHelp:read()
     if not self.json_path:exists() or not self.json_path:isFile() then return nil end
     local text = self.json_path:read_text()
     local json_output = hs.json.decode(text)
-    if not json_output then return nil end
-    return json_output
+    local json_dict = dict(json_output)
+    if not json_dict then return nil end
+    return json_dict
 end
 
 ---Writes the data to the file
@@ -106,12 +138,14 @@ end
 
 --- Returns a JsonHelp object
 --- @param path Path
+--- @param name string| nil
 --- @return JsonHelp | nil
-function JsonHelp:getInstance(path)
-    local instance = JsonHelp():init(path)
+function JsonHelp:instanceGetter(path, name)
+    if not name then name = "Json" end
+    local instance = JsonHelp():init(path, name)
     if not instance then return nil end
     return instance
 end
 
-_G.json = function(path) return JsonHelp:json(path) end
-_G.jsonI = function(path) return JsonHelp:getInstance(path) end
+_G.json = function(...) return JsonHelp:json(...) end
+_G.jsonI = function(...) return JsonHelp:instanceGetter(...) end
