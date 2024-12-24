@@ -6,7 +6,7 @@ local Connection = class("Connection")
 
 local WAIT_TIME = 60
 
----comment InitZializes the Connection class
+---comment Initializes the Connection class
 ---@param settings SettingsManager
 ---@param debug boolean
 ---@return self

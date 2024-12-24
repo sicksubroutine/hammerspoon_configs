@@ -1,14 +1,27 @@
 local class = require("classes.30log")
 
--- Context manager base class
+---@class Context
+---@field private cleanup fun(self: Context): nil
+---@field private __close fun(self: Context): nil
+---@field public extend fun(self: Context, name: string): Context
 local Context = class("Context")
+
+
 function Context:__close()
     if self.cleanup then
         self:cleanup()
     end
 end
 
--- Try/catch utility
+function Context:cleanup()
+    -- Override this method to cleanup resources
+end
+
+---@generic T
+---@param f fun(): any
+---@param catch_f fun(err: string)|nil
+---@param finally_f fun()|nil
+---@return boolean, string|nil
 local function try(f, catch_f, finally_f)
     local status, err = pcall(f)
     if not status and catch_f then
@@ -20,15 +33,24 @@ local function try(f, catch_f, finally_f)
     return status, err
 end
 
--- File class with context management
+---@class File : Context
+---@field private file file*|nil
+---@field public init fun(self: File, filename: string, mode: string|nil): File
+---@field public cleanup fun(self: File): nil
+---@field public read fun(self: File): string
+---@field public write fun(self: File, data: string)
 local File = Context:extend("File")
 function File:init(filename, mode)
     self.file = io.open(filename, mode or "r")
     if not self.file then
         error("Could not open file: " .. filename)
     end
+    return self
 end
 
+---@override -- THIS IS PYTHON-ISH AND I WILL DECORATE IF I WANT TO! 😤
+--- Cleanup the file resources
+---@return nil
 function File:cleanup()
     if self.file then
         print("Closing file automatically!")
@@ -44,14 +66,21 @@ function File:write(data)
     return self.file:write(data)
 end
 
---- timer class
---- @class Timer
+---@class Timer : Context
+---@field private name string
+---@field private start_time number
+---@field private final_time number
+---@field public init fun(self: Timer, name: string|nil): Timer
+---@field public elapsed fun(self: Timer): number
+---@field public format_elapsed fun(self: Timer): string
+---@field public print fun(self: Timer): string
+---@field public cleanup fun(self: Timer): nil
 local Timer = Context:extend("Timer")
-
 
 function Timer:init(name)
     self.name = name or "Timer"
     self.start_time = os.clock()
+    return self
 end
 
 function Timer:elapsed()
@@ -70,15 +99,22 @@ end
 
 function Timer:print()
     return "${name} took: ${time}" % {
-        name = self.name, 
+        name = self.name,
         time = self:format_elapsed()
     }
 end
 
+---@override
+--- Cleanup the timer resources
+---@return nil
 function Timer:cleanup()
     self.final_time = self:elapsed()
 end
 
+---@alias T { __close: function } -- This is a type alias for a table with a __close method
+---@param resource T
+---@param func function
+---@return boolean, any
 local function with(resource, func)
     local r <close> = resource
     return try(
@@ -94,7 +130,6 @@ _G.File = File
 _G.Timer = Timer
 
 
--- Use both together:
 -- try(function()
 --     local f <close> = File("test.txt", "w")
 --     f:write("Hello")
@@ -107,7 +142,6 @@ _G.Timer = Timer
 --     print("All cleaned up!")
 -- end)
 
--- Use it:
 -- with(File("test.txt", "w"), function(f)
 --     f:write("Hello")
 --     error("oops")  -- Error is caught, file is still closed
