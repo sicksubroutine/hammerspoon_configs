@@ -1,4 +1,4 @@
-local class = require("30log")
+local class = require('classes.30log')
 
 ---@class Logger
 ---@field private logfile file*
@@ -22,7 +22,7 @@ local class = require("30log")
 ---@field public debug fun(self: Logger, ...: any)
 ---@field public getLogger fun(name: string, log_level: string): Logger | nil
 ---@return Logger
-local Logger = class({name="Logger"})
+local Logger = class("Logger")
 
 function Logger:init(logname, log_level)
     self.logfile = nil
@@ -119,7 +119,7 @@ end
 ---@param log_level string
 ---@return Logger | nil
 function Logger:getLogger(name, log_level)
-    local logger = Logger():init(name, log_level)
+    local logger = Logger(name, log_level)
     if logger:start() then
         return logger
     end

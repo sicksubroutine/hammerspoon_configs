@@ -55,9 +55,7 @@ hyper:registerCommand(
     "Debug Mode Toggle",
     "d",
     function()
-        local temp_data = jData
-        temp_data.debug = not temp_data.debug
-        jSettings:setData(temp_data)
+        jSettings:set("debug", not jSettings:get("debug"))
         jSettings:write(true)
         local debug = jSettings:get("debug")
         if debug then hs.alert.show("Debug Mode is on") else hs.alert.show("Debug Mode is off") end

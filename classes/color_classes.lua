@@ -1,4 +1,4 @@
-local class = require('30log')
+local class = require('classes.30log')
 
 -- Constants
 local END = "\027[0m"

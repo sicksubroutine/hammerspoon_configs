@@ -1,6 +1,6 @@
-local class = require("30log")
+local class = require('classes.30log')
 ---@class Subprocess
-local Subprocess = class({name = "Subprocess"})
+local Subprocess = class("Subprocess")
 
 function Subprocess:init()
     self.running_tasks = {}

@@ -1,7 +1,7 @@
 local debug = jSettings:get("debug", false)
 
 ---@class SettingsManager
-debugSettings = SettingsManager():init("debugSettings", debug)
+debugSettings = SettingsManager("debugSettings", debug)
 
 debugSettings:setAll({
     debug_mode = debug,

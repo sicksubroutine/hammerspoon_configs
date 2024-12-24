@@ -1,18 +1,18 @@
 -- connection.lua
-local class = require("30log")
+local class = require('classes.30log')
 --- @class Connection 
 --- @field settings SettingsManager
-local Connection = class({name="Connection"})
+local Connection = class("Connection")
 
 local WAIT_TIME = 60
 
----comment Initializes the Connection class
+---comment InitZializes the Connection class
 ---@param settings SettingsManager
 ---@param debug boolean
 ---@return self
 function Connection:init(settings, debug)
     if settings then
-        self.settings = settings():init("Connection", debug)
+        self.settings = settings("Connection", debug)
         print("-- Settings initialized")
     end
     self.debug = debug

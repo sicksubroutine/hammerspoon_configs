@@ -1,4 +1,4 @@
-local class = require("30log")
+local class = require('classes.30log')
 
 ---@type string
 local full_date_format = "%m-%d-%Y %I:%M:%S %p"
@@ -31,7 +31,7 @@ local time_only_format = "%I:%M:%S %p"
 ---@field public compare fun(self: DateTime, other: DateTime): number
 ---@field public datetime fun(self: DateTime, year: number|nil, month: number|nil, day: number|nil, hour: number|nil, min: number|nil, sec: number|nil): DateTime
 
-local DateTime = class({name = "DateTime"})
+local DateTime = class("DateTime")
 
 --- Initializes the DateTime class
 --- @param year number|nil

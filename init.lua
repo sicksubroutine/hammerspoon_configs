@@ -1,9 +1,8 @@
 require("_load")
-local connect = require('classes.connection')()
 if jSettings:get("connect", false) then
-    print("-- Connection Mode is on")
-    connect:init(SettingsManager, DebugMode)
+    local connect = require('classes.connection')(SettingsManager, DebugMode)
     connect:start()
+    print("-- Connection Mode is on")
 end
 hs.alert.show("Config loaded")
 local now = dt_now("time")

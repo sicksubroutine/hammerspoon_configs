@@ -2,7 +2,7 @@
 ---@diagnostic disable: undefined-field
 ---@alias Optional nil
 
-local class = require("30log")
+local class = require('classes.30log')
 ---@class Hyper
 ---@field hyperModeActive boolean
 ---@field eventtap hs.eventtap
@@ -189,12 +189,29 @@ function Hyper:whileHyperModeActive(keyPressed)
     return false
 end
 
+function Hyper:ignoreKeys(keyPressed, flags)
+    -- Ignore 
+end
+
+
 ---comment Handles the key events for fun and profit
 ---@param event hs.eventtap.event
 ---@return boolean
 function Hyper:handleKeyEvent(event)
     local keyPressed = hs.keycodes.map[event:getKeyCode()]
     local flags = event:getFlags()
+    local ctrl = flags["ctrl"]
+    local cmd = flags["cmd"]
+    local alt = flags["alt"]
+    local shift = flags["shift"]
+
+    if DebugMode then
+        print("Ctrl: " .. tostring(ctrl))
+        print("Cmd: " .. tostring(cmd))
+        print("Alt: " .. tostring(alt))
+        print("Shift: " .. tostring(shift))
+    end
+
     local hyperKey = compFlags(flags, {"cmd", "alt", "ctrl", "shift"})
 
     if DebugMode then

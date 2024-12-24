@@ -1,7 +1,7 @@
 -- reload.lua
-local class = require("30log")
+local class = require('classes.30log')
 ---@class Reload
-local Reload = class({name="Reload"})
+local Reload = class("Reload")
 
 function Reload:init()
     self.files = nil

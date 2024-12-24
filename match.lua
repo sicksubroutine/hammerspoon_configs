@@ -1,7 +1,7 @@
-local class = require("30log")
+local class = require('classes.30log')
 
 ---@class Match
-local Match = class({name = "Match"})
+local Match = class("Match")
 
 function Match:init(value)
     self.value = value
@@ -77,7 +77,7 @@ function Match:e()
 end
 
 local function match(value)
-    return Match():init(value)
+    return Match(value)
 end
 
 

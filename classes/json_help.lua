@@ -1,4 +1,4 @@
-local class = require("30log")
+local class = require('classes.30log')
 
 ---@class JsonHelp
 ---@field private json_path Path
@@ -30,6 +30,14 @@ function JsonHelp:init(json_path, name)
     return self
 end
 
+--- Set the value of a key
+--- @param key string
+--- @param value any
+function JsonHelp:set(key, value)
+    self.data:set(key, value)
+end
+
+
 ---Sets the data
 ---@param data table|nil
 function JsonHelp:setData(data)
@@ -40,7 +48,7 @@ end
 ---Returns the data
 ---@return table
 function JsonHelp:getData()
-    return self.data
+    return self.data:getAll()
 end
 
 ---Returns the value of the key
@@ -48,8 +56,8 @@ end
 ---@param default any|nil
 ---@return string|nil
 function JsonHelp:get(key, default)
-    if not self.data or not self.data[key] then return default end
-    return self.data[key]
+    local data = self.data:get(key, default)
+    return data
 end
 
 ---Returns the value of a key as a string
@@ -66,19 +74,12 @@ end
 ---@return string
 function JsonHelp:pretty(sep)
     if not sep then sep = "\n" end
-    local prettyStr = "${name}(" % {name = self.name}
+    local prettyStr = "-- ${name}(" % {name = self.name}
     local count = 0
-    local total = 0
-    
-    -- Get total entries
-    for _ in pairs(self.data) do
-        total = total + 1
-    end
-    
-    -- Build string
-    for k, v in pairs(self.data) do
+    local total = self.data:len()
+    for k, v in pairs(self.data:items()) do
         count = count + 1
-        prettyStr = prettyStr .. k .. ": " .. tostring(v)
+        prettyStr = '${prettyStr}"${k}": ${v}' % {prettyStr=prettyStr, k=k, v=v}
         if count < total then
             prettyStr = prettyStr .. sep
         end
@@ -88,12 +89,12 @@ function JsonHelp:pretty(sep)
 end
 
 ---Reads the file and returns the content as a table
----@return table | nil
+---@return DictInstance
 function JsonHelp:read()
     if not self.json_path:exists() or not self.json_path:isFile() then return nil end
     local text = self.json_path:read_text()
     local json_output = hs.json.decode(text)
-    local json_dict = dict(json_output)
+    local json_dict = Dict(json_output)
     if not json_dict then return nil end
     return json_dict
 end
@@ -103,7 +104,7 @@ end
 ---@return boolean
 function JsonHelp:write(prettyprint)
     if not prettyprint then prettyprint = false end
-    local text = hs.json.encode(self.data, prettyprint)
+    local text = hs.json.encode(self.data:getAll(), prettyprint)
     if not text then return false end
     self.json_path:write_text(text)
     return true
@@ -131,7 +132,7 @@ end
 --- @param path Path
 --- @return table | nil
 function JsonHelp:json(path)
-    local instance = JsonHelp():init(path)
+    local instance = JsonHelp(path)
     local data = instance:getData()
     return data
 end
@@ -142,7 +143,7 @@ end
 --- @return JsonHelp | nil
 function JsonHelp:instanceGetter(path, name)
     if not name then name = "Json" end
-    local instance = JsonHelp():init(path, name)
+    local instance = JsonHelp(path, name)
     if not instance then return nil end
     return instance
 end

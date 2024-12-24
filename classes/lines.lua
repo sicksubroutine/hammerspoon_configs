@@ -1,4 +1,4 @@
-local class = require("30log")
+local class = require('classes.30log')
 
 ---A class for working with lines of strings.
 ---@class Lines
@@ -33,7 +33,7 @@ function Lines.fromFile(path)
     for line in content:gmatch("[^\r\n]+") do
         table.insert(lines, line)
     end
-    return Lines():init(lines)
+    return Lines(lines)
 end
 
 ---Returns the number of lines in the Lines class

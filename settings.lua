@@ -1,9 +1,9 @@
-local class = require("30log")
+local class = require('classes.30log')
 
 ---@class SettingsManager
 ---@field private prefix string
 ---@field private debug boolean
-local SettingsManager = class({name = "Settings"})
+local SettingsManager = class("Settings")
 
 --- Initializes the SettingsManager class
 ---@param name string

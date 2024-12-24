@@ -1,25 +1,53 @@
-local class = require("30log")
+---@diagnostic disable: param-type-mismatch
+local class = require('classes.30log')
 
----@class Collection
-local Collection = class({name = "Collection"})
+---@class CollectionInstance
+---@field data table
+---@field maintain_order boolean
+---@field _key_order table|nil
 
---- comment t table maintain_order boolean in the args passed
---- @param t table
---- @param maintain_order boolean|nil
---- @return Collection
+---@class Collection : Class
+---@field init fun(self: Collection, t?: table, maintain_order?: boolean): Collection
+---@field new fun(self: Collection, t?: table, maintain_order?: boolean): Collection
+---@field append fun(self: CollectionInstance, value: any): Collection
+---@field extend_data fun(self: CollectionInstance, t: table): Collection
+---@field pop fun(self: CollectionInstance, index: number): any
+---@field set fun(self: CollectionInstance, key: any, value: any): Collection
+---@field get fun(self: CollectionInstance, key: any, default: any): any
+---@field getAll fun(self: CollectionInstance): table
+---@field len fun(self: CollectionInstance): number
+---@field enumerate fun(self: CollectionInstance): function
+---@field items fun(self: CollectionInstance): nil
+---@field values fun(self: CollectionInstance): nil
+---@field keys fun(self: CollectionInstance): nil
+---@field map fun(self: CollectionInstance, f: function): Collection
+---@field filter fun(self: CollectionInstance, fn: function): Collection
+---@field reduce fun(self: CollectionInstance, fn: function, initial: any): any
+---@field any fun(self: CollectionInstance, fn?: function): boolean
+---@field all fun(self: CollectionInstance, fn?: function): boolean
+---@field range fun(self: CollectionInstance, start: number, stop: number, step?: number): Collection
+---@field reversed fun(self: CollectionInstance): Collection
+---@field sorted fun(self: CollectionInstance, fn?: function): Collection
+---@field zip fun(self: CollectionInstance, ...): function
+---@field str fun(self: CollectionInstance, s: any): string
+---@field pp fun(self: CollectionInstance, indent_spaces?: number): string
+---@field join fun(self: CollectionInstance, separator: string): string
+---@field sum fun(self: CollectionInstance): number
+
+---@type Collection
+local Collection = class("Collection")
+
+--- Initialize a new Collection instance
+---@param self CollectionInstance
+---@param t table|nil
+---@param maintain_order boolean|nil
+---@return CollectionInstance
 function Collection:init(t, maintain_order)
     if t then
         self.data = t
     else
         self.data = {}
     end
-
-    -- if #args == 1 and type(args[1]) == 'table' then
-    --     self.data = args[1]
-    -- elseif #args > 0 then
-    --     self.data = args
-    -- end
-
     self.maintain_order = maintain_order or false
 
     if self.maintain_order then
@@ -38,7 +66,7 @@ function Collection:append(value)
     return self
 end
 
-function Collection:extend(t)
+function Collection:extend_data(t)
     for _, v in ipairs(t) do
         table.insert(self.data, v)
     end
@@ -57,13 +85,12 @@ function Collection:set(key, value)
     return self
 end
 
--- Data Access Methods
-----------------------
-function Collection:get(key)
-    return self.data[key]
+
+function Collection:get(key, default)
+    return self.data[key] or default
 end
 
-function Collection:getData()
+function Collection:getAll()
     return self.data
 end
 
@@ -73,8 +100,6 @@ function Collection:len()
     return count
 end
 
--- Iteration Methods
---------------------
 function Collection:enumerate()
     local i = 0
     local t = self.data
@@ -104,8 +129,6 @@ function Collection:keys()
     end
 end
 
--- Functional Programming Methods
---------------------------------
 function Collection:map(f)
     local mapped = {}
     for k, v in pairs(self.data) do
@@ -148,8 +171,6 @@ function Collection:all(fn)
     return true
 end
 
--- Array Operation Methods
---------------------------
 function Collection:range(start, stop, step)
     step = step or 1
     local t = {}
@@ -196,8 +217,6 @@ function Collection:zip(...)
     end
 end
 
--- String and Display Methods
-----------------------------
 function Collection:str(s)
     return tostring(s)
 end
@@ -241,6 +260,8 @@ function Collection:pp(indent_spaces)
                 end
             end)
         end
+        
+        if not keys then return "{}" end
 
         for _, k in ipairs(keys) do
             local v = obj[k]
@@ -274,11 +295,9 @@ function Collection:join(separator)
     return table.concat(self.data, separator)
 end
 
--- Mathematical Methods
-----------------------
 function Collection:sum()
     return self:reduce(function(acc, v) return acc + v end, 0)
 end
 
 
-_G.Collection = Collection
+return Collection

@@ -1,10 +1,10 @@
 ---@diagnostic disable: lowercase-global
-local class = require("30log")
+local class = require('classes.30log')
 
 function dataclass(class_name, fields)
     print("Creating dataclass:", class_name)
     ---@class DataClass
-    local NewClass = class({name = class_name})
+    local NewClass = class(class_name)
 
     function NewClass:init(data)
         print("Init called with:", data) -- Debugging
@@ -119,8 +119,8 @@ _G.dataclass = dataclass
 --     email = {type = "string"}
 -- })
 
--- local person1 = Person():init({name = "Alice", age = 30, email = "alice@diagnostic.com"})
--- local person2 = Person():init({name = "Alice", age = 30, email = "alice@diagnostic.com"})
+-- local person1 = Person({name = "Alice", age = 30, email = "alice@diagnostic.com"})
+-- local person2 = Person({name = "Alice", age = 30, email = "alice@diagnostic.com"})
 
 -- -- __tostring
 -- print("\n__tostring test:")
@@ -135,7 +135,7 @@ _G.dataclass = dataclass
 -- -- __eq
 -- print("\n__eq tests:")
 -- print("person1 == person2:", person1 == person2)
--- local person3 = Person():init({name = "Alice", age = 30, email = "alice@diagnostic.com"})
+-- local person3 = Person({name = "Alice", age = 30, email = "alice@diagnostic.com"})
 -- print("person1 == person3 (should be true):", person1 == person3)
 
 -- -- __lt

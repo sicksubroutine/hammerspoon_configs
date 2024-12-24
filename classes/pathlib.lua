@@ -1,4 +1,4 @@
-local class = require("30log")
+local class = require('classes.30log')
 
 
 ---@class Path
@@ -34,7 +34,7 @@ local class = require("30log")
 ---@field public str fun(self: Path): string
 ---@field public createPath fun(self: Path, path: string): Path
 
-local Path = class({ name = "Path" })
+local Path = class("Path")
 
 ---comment
 ---@param path string
@@ -232,7 +232,7 @@ end
 ---@param path string
 ---@return Path
 function Path:createPath(path)
-    return Path():init(path)
+    return Path(path)
 end
 
-_G.Path = function(path) return Path():createPath(path) end
+_G.Path = function(path) return Path:createPath(path) end

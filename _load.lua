@@ -2,7 +2,7 @@
 --[[##### Load Libraries ###########]]--
 ---@diagnostic disable: lowercase-global, need-check-nil
 require("meta.globals")
-require("classes.data_structs")
+require("classes.data_structures.dictionary")
 require("helpers")
 require("classes.lines")
 require("classes.pathlib")
@@ -29,17 +29,17 @@ _G.print = function(...)
 end
 hs.loadSpoon('EmmyLua')
 require('hs.ipc')
-require("classes.dataclass")
+--require("classes.dataclass")
 require("settings")
 local reload = require("reload")()
-if reload:init() then reload:start() end
+if reload then reload:start() end
 require("classes.datetime")
 __setGlobals__(require("global_constants"))
 --[[#################################]]--
 --[[##### Keyboard Related ##########]]--
 hs.hotkey.bind(CmdAlt, "space", function() hs.application.launchOrFocus("Start") end)
 if jSettings:get("hyper", false) then
-    local hyper = require("classes.hypermode")():init()
+    local hyper = require("classes.hypermode")()
     if hyper then
         _G.hyper = hyper
         hs.alert.show("HyperMode Initialized")
