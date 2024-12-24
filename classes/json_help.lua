@@ -7,6 +7,7 @@ local class = require("30log")
 ---@field public setData fun(self: JsonHelp, data: table|nil)
 ---@field public getData fun(self: JsonHelp): table|nil
 ---@field public get fun(self: JsonHelp, key, default:any|nil): string
+---@field public getString fun(self: JsonHelp, key: string, default:any|nil): string
 ---@field public read fun(self: JsonHelp): table|nil
 ---@field public write fun(self: JsonHelp, prettyprint: boolean|nil): boolean
 ---@field public loads fun(self: JsonHelp, json_string: string): table|nil
@@ -46,6 +47,15 @@ function JsonHelp:get(key, default)
     return self.data[key]
 end
 
+---Returns the value of a key as a string
+---@param key string
+---@param default any|nil
+---@return string|nil
+function JsonHelp:getString(key, default)
+    if not self.data or not self.data[key] then return tostring(default) end
+    return tostring(self.data[key])
+end
+
 ---Reads the file and returns the content as a table
 ---@return table | nil
 function JsonHelp:read()
@@ -67,6 +77,9 @@ function JsonHelp:write(prettyprint)
     return true
 end
 
+---Converts the json string to a table
+---@param json_string string
+---@return nil
 function JsonHelp:loads(json_string)
     local data = hs.json.decode(json_string)
     return data
