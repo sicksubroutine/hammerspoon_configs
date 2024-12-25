@@ -1,4 +1,5 @@
 local class = require('classes.30log')
+local dict = GetDataStructure("Dict")
 
 ---@class JsonHelp
 ---@field private json_path Path
@@ -74,18 +75,18 @@ end
 ---@return string
 function JsonHelp:pretty(sep)
     if not sep then sep = "\n" end
-    local prettyStr = "-- ${name}(" % {name = self.name}
+    local str = "-- ${name}(" % {name = self.name}
     local count = 0
     local total = self.data:len()
-    for k, v in pairs(self.data:items()) do
+    for key, val in pairs(self.data:items()) do
         count = count + 1
-        prettyStr = '${prettyStr}"${k}": ${v}' % {prettyStr=prettyStr, k=k, v=v}
+        str = '${str}"${k}": ${v}' % {str=str, k=key, v=val}
         if count < total then
-            prettyStr = prettyStr .. sep
+            str = str .. sep
         end
     end
-    prettyStr = prettyStr .. ")"
-    return prettyStr
+    str = str .. ")"
+    return str
 end
 
 ---Reads the file and returns the content as a table
@@ -94,7 +95,7 @@ function JsonHelp:read()
     if not self.json_path:exists() or not self.json_path:isFile() then return nil end
     local text = self.json_path:read_text()
     local json_output = hs.json.decode(text)
-    local json_dict = Dict(json_output)
+    local json_dict = dict(json_output)
     if not json_dict then return nil end
     return json_dict
 end

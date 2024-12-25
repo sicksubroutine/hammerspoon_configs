@@ -13,31 +13,19 @@ function Context:__close()
     end
 end
 
+--- Cleanup Metamethod
+--- This metamethod is called when the object is garbage collected
 function Context:cleanup()
     -- Override this method to cleanup resources
 end
 
----@generic T
----@param f fun(): any
----@param catch_f fun(err: string)|nil
----@param finally_f fun()|nil
----@return boolean, string|nil
-local function try(f, catch_f, finally_f)
-    local status, err = pcall(f)
-    if not status and catch_f then
-        catch_f(err)
-    end
-    if finally_f then
-        finally_f()
-    end
-    return status, err
-end
+
 
 ---@class File : Context
 ---@field private file file*|nil
 ---@field public init fun(self: File, filename: string, mode: string|nil): File
 ---@field public cleanup fun(self: File): nil
----@field public read fun(self: File): string
+---@field public read fun(self: File, content:string): string
 ---@field public write fun(self: File, data: string)
 local File = Context:extend("File")
 function File:init(filename, mode)
@@ -53,19 +41,25 @@ end
 ---@return nil
 function File:cleanup()
     if self.file then
-        print("Closing file automatically!")
+        --print("Closing file automatically!")
         self.file:close()
     end
 end
 
-function File:read()
-    return self.file:read("*a")
+--- Read a file and return the contents
+---@return string
+function File:read(content)
+    return self.file:read(content)
 end
 
+--- Write data to a file
+--- @param data string
 function File:write(data)
     return self.file:write(data)
 end
 
+
+--[[ Timer Class ]]--
 ---@class Timer : Context
 ---@field private name string
 ---@field private start_time number
@@ -111,18 +105,51 @@ function Timer:cleanup()
     self.final_time = self:elapsed()
 end
 
+-- ---@alias T { __close: function } -- This is a type alias for a table with a __close method
+-- ---@param resource T
+-- ---@param func function
+-- ---@return boolean, any
+-- local function with(resource, func)
+--     local r <close> = resource
+--     return try(
+--         function() return func(r) end,
+--         function(err) 
+--             print("Error in with block:", err)
+--         end
+--     )
+-- end
+
+---@param f fun(): boolean, any
+---@param catch_f fun(err: string)|nil
+---@param finally_f fun()|nil
+---@return boolean, any
+local function try(f, catch_f, finally_f)
+    local status, result = pcall(f)
+    if not status and catch_f then
+        catch_f(result)
+    end
+    if finally_f then
+        finally_f()
+    end
+    return status, result
+end
+
 ---@alias T { __close: function } -- This is a type alias for a table with a __close method
 ---@param resource T
 ---@param func function
----@return boolean, any
+---@return any
 local function with(resource, func)
     local r <close> = resource
-    return try(
+    local status, result = try(
         function() return func(r) end,
         function(err) 
             print("Error in with block:", err)
         end
     )
+    if status then
+        return result
+    end
+    return nil
 end
 
 _G.with = with

@@ -9,7 +9,7 @@ local WAIT_TIME = 60
 ---comment Initializes the Connection class
 ---@param settings SettingsManager
 ---@param debug boolean
----@return self
+---@return Connection
 function Connection:init(settings, debug)
     if settings then
         self.settings = settings("Connection", debug)
@@ -25,6 +25,7 @@ end
 -- Private functions --
 
 --- Uses Osascript to turn off the Wi-Fi
+---@return nil
 local function turnOffWiFi()
     hs.osascript.applescript([[
         do shell script "networksetup -setairportpower Wi-Fi off"
@@ -33,6 +34,7 @@ local function turnOffWiFi()
 end
 
 --- Uses Osascript to turn on the Wi-Fi
+---@return nil
 local function turnOnWifi()
     hs.osascript.applescript([[
         do shell script "networksetup -setairportpower Wi-Fi on"
@@ -100,6 +102,7 @@ function Connection:checkEthernetStatus()
 end
 
 --- Forces a reset of all states
+---@return nil
 function Connection:resetState()
     print("Forcing state reset...")
     self.wifi = false
@@ -110,6 +113,7 @@ function Connection:resetState()
 end
 
 --- Checks the current state of the interfaces and takes appropriate actions
+---@return nil
 function Connection:checkInterfaces()
     local wifi_status = self:checkWiFiStatus()
     local ethernet_status = self:checkEthernetStatus()
@@ -136,6 +140,7 @@ function Connection:checkInterfaces()
 end
 
 --- Starts the timer to check the interfaces
+---@return nil
 function Connection:start()
     local current_time = dt_now()
     print("-- Checking interfaces at datetime: "..tostring(current_time))

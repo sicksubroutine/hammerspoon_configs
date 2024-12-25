@@ -95,10 +95,6 @@ function Dict:clear()
     return self
 end
 
-function Dict:getDict(table)
-    return Dict(table)
-end
-
 function Dict:__pairs()
     return pairs(self.data)
 end
@@ -107,4 +103,9 @@ function Dict:__name()
     return "Dict"
 end
 
+function Dict:getDict(table)
+    return Dict(table)
+end
+
 _G.Dict = function(...) return Dict:getDict(...) end
+return Dict

@@ -1,7 +1,7 @@
 --[[#################################]]--
 --[[##### Load Libraries ###########]]--
 ---@diagnostic disable: lowercase-global, need-check-nil
-require("classes.data_structures.dictionary")
+GetDataStructure = require("classes.data_structures._init")
 require("classes.lines")
 require("classes.pathlib")
 require("classes.lines")

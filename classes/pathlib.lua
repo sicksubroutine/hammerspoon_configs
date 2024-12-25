@@ -169,14 +169,30 @@ function Path:Home()
     return os.getenv('HOME')
 end
 
+
+-- try(function()
+--     local f <close> = File("test.txt", "w")
+--     f:write("Hello")
+--     error("Something went wrong!")  -- This will be caught, but file still closes
+-- end,
+-- function(err)
+--     print("Caught error:", err)
+-- end,
+-- function()
+--     print("All cleaned up!")
+-- end)
+
+-- with(File("test.txt", "w"), function(f)
+--     f:write("Hello")
+--     error("oops")  -- Error is caught, file is still closed
+-- end)
+
 ---Reads the file and returns the content as a string
 ---@return string | nil
 function Path:read_text()
-    if not self._exists then return nil end
-    local file = io.open(self.path, "r")
-    if not file then return nil end
-    local content = file:read("*all")
-    file:close()
+    local content = with(File(self.path, "r"), function(f)
+        return f:read("*a")
+    end)
     return content
 end
 
@@ -204,12 +220,12 @@ end
 ---@param lines table<string>
 ---@return boolean
 function Path:writeLines(lines)
-    local file = io.open(self.path, "w")
-    if not file then return false end
-    for _, line in ipairs(lines) do
-        file:write(line .. "\n")
-    end
-    file:close()
+    with(File(self.path, "w"), function(f)
+            for _, line in ipairs(lines) do
+                f:write(line .. "\n")
+            end
+        end
+    )
     return true
 end
 
@@ -217,10 +233,7 @@ end
 ---@param content string
 ---@return boolean
 function Path:append(content)
-    local file = io.open(self.path, "a")
-    if not file then return false end
-    file:write(content)
-    file:close()
+    with(File(self.path, "a"), function(f)f:write(content) end)
     return true
 end
 

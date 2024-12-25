@@ -25,10 +25,9 @@ end
 ---@return Lines | nil
 function Lines.fromFile(path)
     if not path:exists() or not path:isFile() then return nil end
-    local file = io.open(path:str(), "r")
-    if not file then return nil end
-    local content = file:read("*all")
-    file:close()
+    local content = with(File(path:str(), "r") , function(f)
+        return f:read_text()
+    end)
     local lines = {}
     for line in content:gmatch("[^\r\n]+") do
         table.insert(lines, line)
