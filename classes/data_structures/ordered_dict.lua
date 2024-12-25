@@ -1,4 +1,4 @@
-local Dict = require("classes.data_structures.dictionary")
+local Dict = require("classes.data_structures.dict")
 
 ---@class OrderedDict : Dict
 ---@field data table

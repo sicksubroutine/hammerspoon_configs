@@ -1,5 +1,5 @@
 local class = require('classes.30log')
-
+local file = require('classes.context_manager')
 
 ---@class Path
 ---@field private path string
@@ -249,3 +249,4 @@ function Path:createPath(path)
 end
 
 _G.Path = function(path) return Path:createPath(path) end
+return Path

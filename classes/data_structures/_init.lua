@@ -1,5 +1,5 @@
 local Collection = require("classes.data_structures.collection")
-local dict = require("classes.data_structures.dictionary")
+local dict = require("classes.data_structures.dict")
 local list = require("classes.data_structures.list")
 local set = require("classes.data_structures.set")
 local stack = require("classes.data_structures.stack")

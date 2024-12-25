@@ -68,3 +68,4 @@ function SettingsManager:getAllKeys()
 end
 
 _G.SettingsManager = SettingsManager
+return SettingsManager

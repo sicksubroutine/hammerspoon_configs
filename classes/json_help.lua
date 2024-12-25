@@ -1,5 +1,5 @@
 local class = require('classes.30log')
-local dict = GetDataStructure("Dict")
+local dict = require('classes.data_structures.dict')
 
 ---@class JsonHelp
 ---@field private json_path Path
@@ -151,3 +151,5 @@ end
 
 _G.json = function(...) return JsonHelp:json(...) end
 _G.jsonI = function(...) return JsonHelp:instanceGetter(...) end
+
+return JsonHelp

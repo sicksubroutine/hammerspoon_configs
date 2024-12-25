@@ -1,5 +1,6 @@
 -- connection.lua
 local class = require('classes.30log')
+local settingsManager = require("classes.settings")
 --- @class Connection 
 --- @field settings SettingsManager
 local Connection = class("Connection")
@@ -7,15 +8,10 @@ local Connection = class("Connection")
 local WAIT_TIME = 60
 
 ---comment Initializes the Connection class
----@param settings SettingsManager
----@param debug boolean
 ---@return Connection
-function Connection:init(settings, debug)
-    if settings then
-        self.settings = settings("Connection", debug)
-        print("-- Settings initialized")
-    end
-    self.debug = debug
+function Connection:init()
+    self.settings = settingsManager("Connection", DebugMode)
+    self.debug = DebugMode
     self.wifi = self.settings:get("wifi", false)
     self.ethernet = self.settings:get("ethernet", false)
     print("-- Debug: ${s.debug}, WiFi: ${s.wifi}, Ethernet: ${s.ethernet}" % {s=self})

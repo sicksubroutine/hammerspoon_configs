@@ -1,3 +1,5 @@
+
+---@comment Params for registering a command
 -- function Hyper:registerCommand(name, key, action, showInMenu, menuTitle)
 --     self.commands[key] = {
 --         name = name,
@@ -67,6 +69,24 @@ hyper:registerCommand(
     true,
     "❖ + D: Toggle Debug Mode"
 )
+
+hyper:registerCommand(
+    "Hyper Mode Toggle", -- Disable Hyper Mode For Now
+    "h",
+    function()
+        jSettings:set("hyper", not jSettings:get("hyper"))
+        jSettings:write(true)
+        local hyper = jSettings:get("hyper")
+        if hyper then hs.alert.show("hyper Mode is on") else hs.alert.show("hyper Mode is off") end
+        -- wait a second
+        hs.timer.doAfter(1, function()
+            hs.reload()
+        end)
+    end,
+    true,
+    "❖ + D: Toggle Debug Mode"
+)
+
 
 hyper:registerCommand(
     "Clear Log",

@@ -1,33 +1,10 @@
---[[#################################]]--
---[[##### Load Libraries ###########]]--
----@diagnostic disable: lowercase-global, need-check-nil
-GetDataStructure = require("classes.data_structures._init")
-require("classes.lines")
-require("classes.pathlib")
-require("classes.lines")
-require("classes.json_help")
-jSettings = jsonI(Path("~/.hammerspoon/settings.json"), "jSettings")
-jData = jSettings:getData() --{"connect": false, "hyper": true, "debug": false, "clear": true}
-print(jSettings:pretty(", "))
-__setGlobals__({jSettings = jSettings, jData = jData})
-__setGlobals__(require("global_constants"))
-logger = require("logging"):getLogger("__hammerspoon", "debug")
-local bPrint = print
-_G.print = function(...)
-    local args = {...}
-    local message = table.concat(args, "\t")
-    logger:info(message)
-    bPrint(...)
+--[[####### Connection Related ######]]--
+if jSettings:get("connect", false) then
+    require('classes.connection')():start()
+    print("-- Connection Mode is on")
 end
-hs.loadSpoon('EmmyLua')
-require('hs.ipc')
-require("classes.dataclass")
-
-local reload = require("reload")()
-if reload then reload:start() end
-require("classes.datetime")
 --[[#################################]]--
---[[##### Keyboard Related ##########]]--
+--[[####### Keyboard Related ########]]--
 hs.hotkey.bind(CmdAlt, "space", function() hs.application.launchOrFocus("Start") end)
 if jSettings:get("hyper", false) then
     local hyper = require("classes.hypermode")()
@@ -43,5 +20,16 @@ if jSettings:get("hyper", false) then
     else
         hs.alert.show("Failed to initialize Hyper Mode")
     end
+else
+    hs.hotkey.bind(HyperKey, "h", function()
+        jSettings:set("hyper", not jSettings:get("hyper"))
+        jSettings:write(true)
+        local hyper = jSettings:get("hyper")
+        if hyper then hs.alert.show("hyper Mode is on") else hs.alert.show("hyper Mode is off") end
+        -- wait a second
+        hs.timer.doAfter(1, function()
+            hs.reload()
+        end)
+    end)
 end
 --[[#################################]]--
