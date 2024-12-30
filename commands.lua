@@ -46,7 +46,7 @@ hyper:registerCommand(
     "Launch Raycast",
     "space",
     function()
-        hs.application.launchOrFocus("Start")
+        hs.application.launchOrFocus(RaycastName)
         hyper.setMode(false)
     end,
     true,

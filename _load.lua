@@ -5,7 +5,6 @@ if jSettings:get("connect", false) then
 end
 --[[#################################]]--
 --[[####### Keyboard Related ########]]--
-hs.hotkey.bind(CmdAlt, "space", function() hs.application.launchOrFocus("Start") end)
 if jSettings:get("hyper", false) then
     local hyper = require("classes.hypermode")()
     if hyper then
@@ -14,8 +13,6 @@ if jSettings:get("hyper", false) then
         hs.hotkey.bind({}, "F17", function()
             hyper:toggleHyperMode()
         end)
-        hs.hotkey.bind(HyperKey, "space", function() hs.application.launchOrFocus(RaycastName) end)
-        hs.hotkey.bind(HyperKey, "a", function() hyper:toggleHyperMode() end)
         require("commands")
     else
         hs.alert.show("Failed to initialize Hyper Mode")

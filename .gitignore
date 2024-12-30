@@ -1,3 +1,4 @@
 *.log
 **/Spoons
 *.json
+console/.hammerspoon_console_history
