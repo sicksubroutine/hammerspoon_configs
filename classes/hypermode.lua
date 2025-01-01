@@ -303,32 +303,32 @@ function Hyper:handleKeyEvent(event)
         print("Hyper key match: " .. tostring(hyperKey))
     end
 
-    if self.vncMode then
-        if alt then
-            --local remote = "kai@192.168.50.154"
-            local cmd = "/Users/chaz/.pyenv/shims/python3.12 /Users/chaz/.hammerspoon/sendSubprocess.py alt+Tab"
-            hs.alert.show("Executing Remote Command")
-            hs.timer.doAfter(2, function()
-                --hs.execute("ssh ${r} 'export DISPLAY=:1; xdotool key alt+Left'" % {r = remote})
-            end)
-            hs.alert.show("Forward button pressed")
-            return true
-        end
-        return false
-        -- if cmd then
-        --     hs.alert.show("VNC Mode Cmd Key Pressed")
-        --     --return self:xdotoolInterface()
-        --     return false
-        -- elseif alt then
-        --     if keyPressed == "tab" then
-        --         hs.alert.show("VNC Mode Alt-Tab")
-        --         print("VNC Mode Alt-Tab")
-        --         self:xdotoolInterface("alt-Tab")
-        --         return true
-        --     end
-        --     return false
+    --if self.vncMode then
+        -- if alt then
+        --     local remote = "kai@192.168.50.154"
+        --     --local cmd = "/Users/chaz/.pyenv/shims/python3.12 /Users/chaz/.hammerspoon/sendSubprocess.py alt+Tab"
+        --     --hs.alert.show("Executing Remote Command")
+        --     -- hs.timer.doAfter(1, function()end)
+        --     --hs.alert.show("Remote Command Executed")
+        --     return true
         -- end
-    elseif hyperKey or self.hyperModeActive then
+
+        -- if cmd then
+        -- --     hs.alert.show("VNC Mode Cmd Key Pressed")
+        -- --     --return self:xdotoolInterface()
+        -- --     return false
+        -- -- elseif alt then
+        -- --     if keyPressed == "tab" then
+        -- --         hs.alert.show("VNC Mode Alt-Tab")
+        -- --         print("VNC Mode Alt-Tab")
+        -- --         self:xdotoolInterface("alt-Tab")
+        -- --         return true
+        -- --     end
+        -- --     return false
+        -- end
+    --    return false
+    --end
+    if hyperKey or self.hyperModeActive then
         return self:executeCommand(keyPressed)
     else
         return false
