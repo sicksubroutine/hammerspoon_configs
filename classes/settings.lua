@@ -12,13 +12,14 @@ local SettingsManager = class("Settings")
 function SettingsManager:init(name, debug)
     self.prefix = name and name .. "." or ""
     self.debug = debug or false
+    logger:debug("-- New SettingsManager Created: (${n})" % {n=name})
     return self
 end
 
 function SettingsManager:set(key, value)
     hs.settings.set(self.prefix .. key, value)
     local check = hs.settings.get(self.prefix .. key)
-    if self.debug then print("Added Key to Settings [" .. key .."]: "..tostring(check)) end
+    logger:debug("Added Key to Settings [${k}]: ${c}" % {k=key, c=check})
 end
 
 function SettingsManager:setAll(data)
@@ -29,22 +30,22 @@ end
 
 function SettingsManager:get(key, default)
     local value = hs.settings.get(self.prefix .. key)
-    if self.debug then print("Getting Key from Settings [" .. key .."]: "..tostring(value)) end
+    logger:debug("Getting Key from Settings [${k}] ${v}" % {k=key, v=str(value)})
     return value ~= nil and value or default
 end
 
 function SettingsManager:delete(key)
     if self:get(key) == nil then
-        if self.debug then print("Key [" .. key .. "] does not exist") end
+        logger:warning("Key [${k}] does not exist" % {k=key})
         return false
     end
     hs.settings.clear(self.prefix .. key)
     local check = hs.settings.get(self.prefix .. key)
-    if self.debug then print("Deleted Key from Settings [" .. key .."]: "..tostring(check)) end
+    logger.debug("Deleted Key from Settings [${k}]: ${c}" % {k=key, c=check})
 end
 
 function SettingsManager:clear()
-    if self.debug then print("Clearing all settings") end
+    logger:debug("Clearing all settings")
     return hs.settings.clear()
 end
 
@@ -63,7 +64,7 @@ function SettingsManager:getAllKeys()
         end
     end
 
-    if self.debug then print("Number of keys returned: " .. #prefix_keys) end
+    logger:debug("Number of keys returned: ${n}" % {n=#prefix_keys})
     return prefix_keys
 end
 

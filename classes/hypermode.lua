@@ -24,6 +24,7 @@ function Hyper:init()
     self.commands = {}
     self.vncMode = false
     self.keyDownTracker = self:returnKeyDownTracker()
+    self.keyUpTracker = self:returnKeyUpTracker()
     --self.mouseButtonTracker = self:returnMouseButtonDownTracker()
     self.vncWatcher = self:vncModeCheck() -- Check if VNC Viewer is in focus
     self.menubarItem = hs.menubar.new()
@@ -40,6 +41,7 @@ function Hyper:onInit()
     self:updateMenubar()
     self.vncWatcher:start()
     self.keyDownTracker:start()
+    self.keyUpTracker:start()
     --self.mouseButtonTracker:start()
 end
 
@@ -54,11 +56,27 @@ function Hyper:registerCommand(name, key, action, showInMenu, menuTitle)
     }
 end
 
+---Register a command object
+---@param cmdObj Command
+function Hyper:regCmd(cmdObj)
+    for k, v in pairs(cmdObj) do
+        self.commands[k] = v
+    end
+end
+
+
 --- comment Returns the event tap for the Hyper Mode
 ---@return hs.eventtap
 function Hyper:returnKeyDownTracker()
     local tap = hs.eventtap.new({ hs.eventtap.event.types.keyDown }, function(event)
-        return self:handleKeyEvent(event)
+        return self:handleKeyEvent(event, "Key Down")
+    end)
+    return tap
+end
+
+function Hyper:returnKeyUpTracker()
+    local tap = hs.eventtap.new({ hs.eventtap.event.types.keyUp }, function(event)
+        return self:handleKeyEvent(event, "Key Up")
     end)
     return tap
 end
@@ -91,7 +109,6 @@ function Hyper:vncModeCheck()
     end
     return nil
 end
-
 
 --- comment Returns the current mode of the Hyper Mode
 ---@return boolean
@@ -135,7 +152,6 @@ function Hyper:createMenu()
             disabled = true
         }
     }
-    
     for _, command in pairs(self.commands) do
         if command.showInMenu then
             table.insert(menu, {
@@ -231,8 +247,8 @@ function Hyper:whileHyperModeActive(keyPressed)
     return false
 end
 
-function Hyper:ignoreKeys(keyPressed, flags)
-    -- Ignore 
+function Hyper:ignoreKeys()
+    return false
 end
 
 function Hyper:handleMouseEvent(event, buttonNumber)
@@ -240,99 +256,102 @@ function Hyper:handleMouseEvent(event, buttonNumber)
     return false
 end
 
---- An interface between local commands on MacOS and remote Linux commands
----@param keys string
-function Hyper:xdotoolInterface(keys)
-    local sshCmd = "ssh kai@192.168.50.154"
-    -- "export DISPLAY=:1; xdotool key ${keys}"' % {keys=keys}
-    sshCmd = "${s} 'export DISPLAY=:1; xdotool key ${keys}'" % {s=sshCmd, keys=keys}
-    -- local keyMap = {
-    --     ["cmd"] = "ctrl",
-    --     ["alt"] = "alt",
-    --     ["ctrl"] = "super",
-    --     ["shift"] = "shift"
-    -- }
-    -- local keyStr = ""
-    -- for key, value in pairs(flags) do
-    --     if value then
-    --         keyStr = keyStr .. keyMap[key] .. "+"
-    --         local p = {key=key, value=value}
-    --         hs.alert.show("Original Flag: ${key} Passed Key: ${value}" % p)
-    --     end
-    --     -- check if last char is a plus and if so, remove it
-    --     if keyStr:sub(-1) == "+" then
-    --         keyStr = keyStr:sub(1, -2)
-    --     end
-    -- end
-    -- hs.alert.show("")
-    -- -- flags might have more than one key, need to concatenate them together like:
-    -- -- ctrl+alt+shift+super+key
-    hs.alert.show("Executing: " .. sshCmd)
-    -- wait a second
-    hs.timer.doAfter(2, function()
-        local handle = io.popen(sshCmd .. " 2>&1")
-        local result = handle:read("*a")
-        handle:close()
-        logger:info("Result: " .. result)
-        hs.alert.show("Result: " .. result)
-    end)
-
+function Hyper:handleKeyUpEvent(event, key)
+    hs.alert.show("Key Up Event: " .. key)
+    return false
 end
 
 
 ---comment Handles the key events for fun and profit
 ---@param event hs.eventtap.event
+---@param eventType string
 ---@return boolean
-function Hyper:handleKeyEvent(event)
+function Hyper:handleKeyEvent(event, eventType)
+    ---@type string
     local keyPressed = hs.keycodes.map[event:getKeyCode()]
+    local keyDown = eventType == "Key Down"
+    local keyUp = eventType == "Key Up"
     local flags = event:getFlags()
     local ctrl, cmd, alt, shift = flags["ctrl"], flags["cmd"], flags["alt"], flags["shift"]
-    local hyperKey = compFlags(
-        flags, 
-        {"cmd", "alt", "ctrl", "shift"}
-    )
+    local hyperKey = compFlags(flags, {"cmd", "alt", "ctrl", "shift"})
+    --local disableAll = true
+    local disableAll = false
 
-    if DebugMode then
-        print("Ctrl: " .. tostring(ctrl))
-        print("Cmd: " .. tostring(cmd))
-        print("Alt: " .. tostring(alt))
-        print("Shift: " .. tostring(shift))
-        print("Key pressed: " .. tostring(keyPressed))
-        print("Flags: " .. hs.inspect(flags))
-        print("Hyper Mode Active: " .. tostring(self.hyperModeActive))
-        print("Hyper key match: " .. tostring(hyperKey))
+
+    if DebugMode and not disableAll then
+        local dTable = DebugTable({
+        theme = DebugTheme({
+            title = "Key Events",
+            prefix = "-- ",
+            mid = ": ",
+            sep = "\n"
+        }),
+        data = {
+            Event = eventType,
+            Key = keyPressed,
+            Ctrl = boolToStr(ctrl),
+            Cmd = boolToStr(cmd),
+            Alt = boolToStr(alt),
+            Shift = boolToStr(shift),
+            HyperKey = boolToStr(hyperKey),
+            HyperMode = boolToStr(self.hyperModeActive)
+        }}
+    )
+        dTable:debugPrint()
     end
 
-    --if self.vncMode then
-        -- if alt then
-        --     local remote = "kai@192.168.50.154"
-        --     --local cmd = "/Users/chaz/.pyenv/shims/python3.12 /Users/chaz/.hammerspoon/sendSubprocess.py alt+Tab"
-        --     --hs.alert.show("Executing Remote Command")
-        --     -- hs.timer.doAfter(1, function()end)
-        --     --hs.alert.show("Remote Command Executed")
-        --     return true
-        -- end
-
-        -- if cmd then
-        -- --     hs.alert.show("VNC Mode Cmd Key Pressed")
-        -- --     --return self:xdotoolInterface()
-        -- --     return false
-        -- -- elseif alt then
-        -- --     if keyPressed == "tab" then
-        -- --         hs.alert.show("VNC Mode Alt-Tab")
-        -- --         print("VNC Mode Alt-Tab")
-        -- --         self:xdotoolInterface("alt-Tab")
-        -- --         return true
-        -- --     end
-        -- --     return false
-        -- end
-    --    return false
-    --end
-    if hyperKey or self.hyperModeActive then
-        return self:executeCommand(keyPressed)
-    else
+    if keyUp then
+        return Hyper:ignoreKeys()
+    end
+    if disableAll then
         return false
     end
+    
+
+    if not hyperKey or self.hyperModeActive then
+        return false
+    end
+    return self:executeCommand(keyPressed)
+
+    -- if self.vncMode then
+    --     if keyPressed == "tab" then
+    --         -- /Users/chaz/.hammerspoon/sendSubprocess
+    --         -- run the subprocess in shell
+    --         local script = "/Users/chaz/.hammerspoon/sendSubprocess"
+
+    --         local altDown = "alt keydown"
+    --         local altDownCmd = "${s} ${k}" % { s = script, k = altDown }
+    --         local altUp = "alt keyup"
+    --         local altUpCmd = "${s} ${k}" % { s = script, k = altUp }
+    --         local tabDown = "tab keydown"
+    --         local tabDownCmd = "${s} ${k}" % { s = script, k = tabDown }
+    --         local tabUp = "tab keyup"
+    --         local tabUpCmd = "${s} ${k}" % { s = script, k = tabUp }
+
+    --         hs.execute(altDownCmd, true)
+    --         hs.execute(tabDownCmd, true)
+
+    --         hs.timer.doAfter(0.1, function()
+    --             hs.execute(tabUpCmd, true)
+    --         end)
+    --         return true
+    --     end
+        
+    --     -- if cmd then
+    --     -- --     hs.alert.show("VNC Mode Cmd Key Pressed")
+    --     -- --     --return self:xdotoolInterface()
+    --     -- --     return false
+    --     -- -- elseif alt then
+    --     -- --     if keyPressed == "tab" then
+    --     -- --         hs.alert.show("VNC Mode Alt-Tab")
+    --     -- --         print("VNC Mode Alt-Tab")
+    --     -- --         self:xdotoolInterface("alt-Tab")
+    --     -- --         return true
+    --     -- --     end
+    --     -- --     return false
+    --     -- end
+    --     return false
+    -- end
 end
 
 function Hyper:executeCommand(key)

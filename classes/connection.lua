@@ -1,25 +1,4 @@
--- connection.lua
-local class = require('classes.30log')
-local settingsManager = require("classes.settings")
---- @class Connection 
---- @field settings SettingsManager
-local Connection = class("Connection")
-
-local WAIT_TIME = 60
-
----comment Initializes the Connection class
----@return Connection
-function Connection:init()
-    self.settings = settingsManager("Connection", DebugMode)
-    self.debug = DebugMode
-    self.wifi = self.settings:get("wifi", false)
-    self.ethernet = self.settings:get("ethernet", false)
-    print("-- Debug: ${s.debug}, WiFi: ${s.wifi}, Ethernet: ${s.ethernet}" % {s=self})
-    return self
-end
-
 -- Private functions --
-
 --- Uses Osascript to turn off the Wi-Fi
 ---@return nil
 local function turnOffWiFi()
@@ -38,25 +17,45 @@ local function turnOnWifi()
     hs.alert.show("Trying to turn Wi-Fi on...")
 end
 
--- Private Methods --
 
---- Prints a debug message if debug is enabled else nothing
----@param message string
-function Connection:p_debug(message)
-    if self.debug then print(message) end
+local class = require('classes.30log')
+local settingsManager = require("classes.settings")
+--- @class Connection 
+--- @field settings SettingsManager
+--- @field debug boolean
+--- @field wifi boolean
+--- @field ethernet boolean
+--- @field dateTime DateTime
+local Connection = class("Connection")
+
+local WAIT_TIME = 60
+
+---comment Initializes the Connection class
+---@return Connection
+function Connection:init()
+    self.dateTime = DateTime.now()
+    self.settings = settingsManager("Connection", DebugMode)
+    self.debug = DebugMode
+    self.wifi = self.settings:get("wifi", false)
+    self.ethernet = self.settings:get("ethernet", false)
+    logger:debug("-- Connection(WiFi: ${s.wifi}, Ethernet: ${s.ethernet})" % {s=self})
+    return self
 end
+
 
 --- Returns a boolean depending on if the time difference is greater than the wait timeout
 ---@return boolean
 function Connection:checkTime()
-    local last_checked = self.settings:get("last_checked", UnixTimestamp())
+    local last_checked = self.settings:get("last_checked", unixTimestamp())
+    last_checked = tonumber(last_checked)
+    local lastCheckedDT = DateTime.fromTimestamp(last_checked)
     if not last_checked then
-        Connection:p_debug("Last checked is nil")
-        self.settings:set("last_checked", UnixTimestamp())
+        logger:debug("Last checked is nil")
+        self.settings:set("last_checked", unixTimestamp())
         return true
     end
-    local current_time = UnixTimestamp()
-    local difference = os.difftime(current_time, last_checked)
+    self.dateTime:updateNow()
+    local difference = self.dateTime:compare(lastCheckedDT)
     return difference > WAIT_TIME
 end
 
@@ -66,15 +65,15 @@ function Connection:checkWiFiStatus()
     local interface_info = hs.network.addresses("en0")
     local new_wifi_status = interface_info ~= nil and #interface_info > 0
 
-    Connection:p_debug(string.format("WiFi Check - Previous State: %s, New State: %s",
+    logger:debug(string.format("WiFi Check - Previous State: %s, New State: %s",
     tostring(self.wifi), tostring(new_wifi_status)))
 
     if new_wifi_status ~= self.wifi then
-        Connection:p_debug("WiFi state changed!")
+        logger:debug("WiFi state changed!")
         self.wifi = new_wifi_status
         self.settings:set("wifi", self.wifi)
     else
-        Connection:p_debug("WiFi state did not change")
+        logger:debug("WiFi state did not change")
     end
     return new_wifi_status
 end
@@ -85,14 +84,14 @@ function Connection:checkEthernetStatus()
     local interface_info = hs.network.addresses("en6")
     local new_ethernet_status = interface_info ~= nil and #interface_info > 0
 
-    Connection:p_debug(string.format("Ethernet Check - Previous State: %s, New State: %s", tostring(self.ethernet), tostring(new_ethernet_status)))
+    logger:debug(string.format("Ethernet Check - Previous State: %s, New State: %s", str(self.ethernet), str(new_ethernet_status)))
 
     if new_ethernet_status ~= self.ethernet then
-        Connection:p_debug("Ethernet state changed!")
+        logger:debug("Ethernet state changed!")
         self.ethernet = new_ethernet_status
         self.settings:set("ethernet", self.ethernet)
     else
-        Connection:p_debug("Ethernet state did not change")
+        logger:debug("Ethernet state did not change")
     end
     return new_ethernet_status
 end
@@ -114,8 +113,9 @@ function Connection:checkInterfaces()
     local wifi_status = self:checkWiFiStatus()
     local ethernet_status = self:checkEthernetStatus()
 
-    Connection:p_debug(string.format("Current States - WiFi: %s, Ethernet: %s", tostring(wifi_status), tostring(ethernet_status)))
-    self.settings:set("last_checked", UnixTimestamp())
+    logger:debug("Current States - WiFi: ${w}, Ethernet: ${e}" % {w=str(wifi_status), e=str(ethernet_status)})
+    logger:debug("Last Checked: ${t}" % {t=str(self.settings:get("last_checked", unixTimestamp()))})
+    self.settings:set("last_checked", unixTimestamp())
 
     local no_interfaces = not wifi_status and not ethernet_status
     local ethernet_and_wifi = wifi_status and ethernet_status
@@ -127,19 +127,19 @@ function Connection:checkInterfaces()
         print("Ethernet is ON, turning off WiFi")
         turnOffWiFi()
     elseif ethernet_status and not wifi_status then
-        Connection:p_debug("Ethernet is ON, not doing anything...")
+        logger:debug("Ethernet is ON, not doing anything...")
     elseif wifi_status and not ethernet_status then
-        Connection:p_debug("WiFi is ON, not doing anything...")
+        logger:debug("WiFi is ON, not doing anything...")
     else
         print("Unknown state, not doing anything...")
     end
 end
 
 --- Starts the timer to check the interfaces
----@return nil
 function Connection:start()
-    local current_time = dt_now()
-    print("-- Checking interfaces at datetime: "..tostring(current_time))
+    self.dateTime:updateNow()
+    local current_time = self.dateTime:strftime(fullDateFormat)
+    logger:debug("-- Checking interfaces at datetime: ${t}" % {t=str(current_time)})
     self:checkInterfaces()
     hs.timer.doAfter(WAIT_TIME, function() self:start() end)
 end

@@ -1,6 +1,13 @@
 local class = require('classes.30log')
 
 -- Constants
+local RED = "\027[0;31m"
+local GREEN = "\027[0;32m"
+local YELLOW = "\027[0;33m"
+local CYAN = "\027[0;36m"
+local PURPLE = "\027[0;35m"
+local WHITE = "\027[0;37m"
+local BLACK = "\027[0;30m"
 local END = "\027[0m"
 local BLUE = "\027[0;34m"
 

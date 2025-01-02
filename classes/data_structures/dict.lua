@@ -83,10 +83,6 @@ function Dict:items()
     return items
 end
 
--- function Dict:copy()
---     return Dict(deep_copy(self.data), self.maintain_order)
--- end
-
 function Dict:clear()
     self.data = {}
     if self.maintain_order then

@@ -1,3 +1,22 @@
+local class = require('classes.30log')
+
+---@class Command
+---@field name string
+---@field key string
+---@field action function | nil
+---@field showInMenu boolean
+---@field menuTitle string
+local Command = class("Command")
+
+function Command:init(cmdData)
+    self.name = cmdData.name or ""
+    self.key = cmdData.key or ""
+    self.action = cmdData.action or nil
+    self.showInMenu = cmdData.showInMenu or false
+    self.menuTitle = cmdData.menuTitle or self.name
+    return self
+end
+
 
 ---@comment Params for registering a command
 -- function Hyper:registerCommand(name, key, action, showInMenu, menuTitle)

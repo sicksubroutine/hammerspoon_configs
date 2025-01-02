@@ -16,10 +16,11 @@ local class = require('classes.30log')
 ---@field public flush fun(self: Logger)
 ---@field public clear fun(self: Logger)
 ---@field private _log fun(self: Logger, level: string, message: string)
----@field public info fun(self: Logger, ...: any)
----@field public error fun(self: Logger, ...: any)
----@field public warning fun(self: Logger, ...: any)
----@field public debug fun(self: Logger, ...: any)
+---@field public info fun(self: Logger, message: any)
+---@field public error fun(self: Logger, message: any)
+---@field public warning fun(self: Logger, message: any)
+---@field public debug fun(self: Logger, message: any)
+---@field public debugConditional fun(self: Logger, message: any)
 ---@field public getLogger fun(name: string, log_level: string): Logger | nil
 ---@return Logger
 local Logger = class("Logger")
@@ -41,6 +42,10 @@ function Logger:init(logname, log_level)
     end
     
     return self
+end
+
+function Logger:__close()
+    self:close()
 end
 
 function Logger:start()
@@ -98,21 +103,11 @@ function Logger:_log(level, message)
     end
 end
 
-function Logger:info(...)  
-    self:_log("info", table.concat({...}, "\t")) 
-end
-
-function Logger:error(...) 
-    self:_log("error", table.concat({...}, "\t")) 
-end
-
-function Logger:warning(...) 
-    self:_log("warning", table.concat({...}, "\t")) 
-end
-
-function Logger:debug(...) 
-    self:_log("debug", table.concat({...}, "\t")) 
-end
+function Logger:info(message) self:_log("info", message) end
+function Logger:error(message) self:_log("error", message) end
+function Logger:warning(message) self:_log("warning", message) end
+function Logger:debug(message) self:_log("debug", message) end
+function Logger:debugConditional(message) if DebugMode then self:debug(message) end end
 
 ---Get a logger instance
 ---@param name string

@@ -2,9 +2,7 @@
 import subprocess
 from argparse import ArgumentParser, Namespace
 
-# ssh kai@192.168.50.154 'export DISPLAY=:1; xdotool key alt+Left'
-
-"""#py
+"""
 import zmq
 import json
 import threading
@@ -217,13 +215,15 @@ if __name__ == "__main__":
 def get_args() -> Namespace:
     parser = ArgumentParser()
     parser.add_argument("key", type=str, help="The key to send to ssh command")
+    parser.add_argument("action", type=str, help="The action to perform", choices=["key", "keydown", "keyup"])
     return parser.parse_args()
 
 
 if __name__ == "__main__":
     args = get_args()
     key = args.key
-    cmd = f"ssh kai@192.168.50.154 'export DISPLAY=:1; xdotool key {key}'"
+    action = args.action
+    cmd = f"ssh kai@192.168.50.154 'export DISPLAY=:1; xdotool {action} {key}'"
 
     result = subprocess.run(cmd, shell=True, capture_output=True)
 

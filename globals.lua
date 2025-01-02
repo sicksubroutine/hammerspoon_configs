@@ -1,20 +1,4 @@
-hs.loadSpoon('EmmyLua')
-require('hs.ipc')
-
---[[#################################]]--
---[[########### Logging #############]]--
 ---@diagnostic disable: lowercase-global, need-check-nil
-logger = require("classes.logging"):getLogger("__hammerspoon", "debug")
-local bPrint = print
-_G.print = function(...)
-    local args = {...}
-    local message = table.concat(args, "\t")
-    logger:info(message)
-    bPrint(...)
-end
---[[#################################]]--
-
----@diagnostic disable: lowercase-global
 DebugMode = false
 HammerspoonPath = ""
 LoggerFileName = ""
@@ -22,13 +6,6 @@ HyperSymbol = ""
 RaycastName = ""
 HyperKey = {}
 CmdAlt = {}
-
--- Global Function Stubs for type checking
-str = function(string)end
-debugPrint = function(...)end
-readFile = function()end
---- Returns the current Unix timestamp
-UnixTimestamp = function()end
 
 --- Sets all keys in the table to global variables
 ---@class Globals
@@ -41,16 +18,29 @@ end
 
 _G.__setGlobals__ = __setGlobals__
 
+--[[#################################]]--
+--[[########### Logging #############]]--
+logger = require("classes.logging"):getLogger("__hammerspoon", "debug")
+hs.loadSpoon('EmmyLua')
+require('hs.ipc')
 require("classes.context_manager")
 require("classes.pathlib")
 require("helpers")
 require("classes.json_help")
 require("classes.dataclass")
 require("classes.datetime")
+local bPrint = print
+_G.print = function(...)
+    local args = {...}
+    local message = table.concat(args, "\t")
+    if string.match(message:lower(), "error") then logger:error(message) else logger:info(message) end
+    bPrint(...)
+end
+--[[#################################]]--
 
 jSettings = jsonI(Path("~/.hammerspoon/settings.json"), "jSettings")
 jData = jSettings:getData() --{"connect": false, "hyper": true, "debug": false, "clear": true}
-print(jSettings:pretty(", "))
+logger:debug(jSettings:pretty(", "))
 
 local debug = jSettings:get("debug", false)
 local settingsManager = require("classes.settings")
@@ -64,6 +54,10 @@ debugSettings:setAll({
     HammerspoonPath = os.getenv('HOME') .. '/.hammerspoon/'
 })
 
+fullDateFormat = "%m-%d-%Y %I:%M:%S %p"
+dateOnlyFormat = "%m-%d-%Y"
+timeOnlyFormat = "%I:%M:%S %p"
+
 __setGlobals__({
     jSettings = jSettings,
     jData = jData,
@@ -74,5 +68,8 @@ __setGlobals__({
     HyperSymbol = "❖",
     RaycastName = "Raycast",
     HyperKey = {"cmd", "ctrl", "alt", "shift"},
-    CmdAlt = {"cmd", "alt"}
+    CmdAlt = {"cmd", "alt"},
+    fullDateFormat = fullDateFormat,
+    dateOnlyFormat = dateOnlyFormat,
+    timeOnlyFormat = timeOnlyFormat
 })
