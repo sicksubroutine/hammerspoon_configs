@@ -1,3 +1,6 @@
+local ethernetKey = "State:/Network/Interface/en6/Link"
+local wifiKey = "State:/Network/Interface/en0/Link"
+local globalIPv4 = "State:/Network/Global/IPv4"
 -- Private functions --
 --- Uses Osascript to turn off the Wi-Fi
 ---@return nil
@@ -26,6 +29,7 @@ local settingsManager = require("classes.settings")
 --- @field wifi boolean
 --- @field ethernet boolean
 --- @field dateTime DateTime
+--- @field config hs.network.configuration | nil
 local Connection = class("Connection")
 
 local WAIT_TIME = 60
@@ -38,6 +42,7 @@ function Connection:init()
     self.debug = DebugMode
     self.wifi = self.settings:get("wifi", false)
     self.ethernet = self.settings:get("ethernet", false)
+    self.config = hs.network.configuration.open()
     logger:debug("-- Connection(WiFi: ${s.wifi}, Ethernet: ${s.ethernet})" % {s=self})
     return self
 end
@@ -62,50 +67,70 @@ end
 --- Returns a boolean depending on if the WiFi status has changed
 ---@return boolean
 function Connection:checkWiFiStatus()
-    local interface_info = hs.network.addresses("en0")
-    local new_wifi_status = interface_info ~= nil and #interface_info > 0
+    local currentWifiState = self.config:contents(wifiKey)
+    if currentWifiState == nil then
+        self.wifi = false
+        self.settings:set("wifi", self.wifi)
+        return false
+    end
+    currentWifiState = currentWifiState[wifiKey].Active or false
 
     logger:debug(string.format("WiFi Check - Previous State: %s, New State: %s",
-    tostring(self.wifi), tostring(new_wifi_status)))
+    tostring(self.wifi), tostring(currentWifiState)))
 
-    if new_wifi_status ~= self.wifi then
+    if currentWifiState ~= self.wifi then
         logger:debug("WiFi state changed!")
-        self.wifi = new_wifi_status
+        self.wifi = currentWifiState
         self.settings:set("wifi", self.wifi)
     else
         logger:debug("WiFi state did not change")
     end
-    return new_wifi_status
+    return currentWifiState
 end
 
 --- Returns a boolean depending on if the Ethernet status has changed
 ---@return boolean
 function Connection:checkEthernetStatus()
-    local interface_info = hs.network.addresses("en6")
-    local new_ethernet_status = interface_info ~= nil and #interface_info > 0
+    local currentEthernetState = self.config:contents(ethernetKey)
+    if currentEthernetState[ethernetKey] == nil then
+        self.ethernet = false
+        self.settings:set("ethernet", self.ethernet)
+        return false
+    end
+    local currentEthernetState = self.config:contents(ethernetKey)[ethernetKey].Active or false
+    logger:debug(string.format("Ethernet Check - Previous State: %s, New State: %s", str(self.ethernet), str(currentEthernetState)))
 
-    logger:debug(string.format("Ethernet Check - Previous State: %s, New State: %s", str(self.ethernet), str(new_ethernet_status)))
-
-    if new_ethernet_status ~= self.ethernet then
+    if currentEthernetState ~= self.ethernet then
         logger:debug("Ethernet state changed!")
-        self.ethernet = new_ethernet_status
+        self.ethernet = currentEthernetState
         self.settings:set("ethernet", self.ethernet)
     else
         logger:debug("Ethernet state did not change")
     end
-    return new_ethernet_status
+    return currentEthernetState
 end
 
 --- Forces a reset of all states
 ---@return nil
 function Connection:resetState()
-    print("Forcing state reset...")
+    logger:debug("Forcing state reset...")
     self.wifi = false
     self.ethernet = false
     self.settings:set("wifi", false)
     self.settings:set("ethernet", false)
     self.settings:set("last_checked", 0)
 end
+
+function Connection:noInterfaces()
+    logger:debug("No interfaces connected, turning on WiFi")
+    turnOnWifi()
+end
+
+function Connection:ethernetWifi()
+    logger:debug("Ethernet and WiFi are connected, turning off WiFi")
+    turnOffWiFi()
+end
+
 
 --- Checks the current state of the interfaces and takes appropriate actions
 ---@return nil
@@ -114,34 +139,36 @@ function Connection:checkInterfaces()
     local ethernet_status = self:checkEthernetStatus()
 
     logger:debug("Current States - WiFi: ${w}, Ethernet: ${e}" % {w=str(wifi_status), e=str(ethernet_status)})
-    logger:debug("Last Checked: ${t}" % {t=str(self.settings:get("last_checked", unixTimestamp()))})
-    self.settings:set("last_checked", unixTimestamp())
 
     local no_interfaces = not wifi_status and not ethernet_status
     local ethernet_and_wifi = wifi_status and ethernet_status
+    local noAction1 = ethernet_status and not wifi_status
+    local noAction2 = not ethernet_status and wifi_status
+    local unknown = not no_interfaces and not ethernet_and_wifi and not noAction1 and not noAction2
 
-    if no_interfaces then
-        print("No interfaces connected, turning on WiFi")
-        turnOnWifi()
-    elseif ethernet_and_wifi then
-        print("Ethernet is ON, turning off WiFi")
-        turnOffWiFi()
-    elseif ethernet_status and not wifi_status then
-        logger:debug("Ethernet is ON, not doing anything...")
-    elseif wifi_status and not ethernet_status then
-        logger:debug("WiFi is ON, not doing anything...")
-    else
-        print("Unknown state, not doing anything...")
-    end
+    -- We will actually take action here
+    if no_interfaces then self:noInterfaces() return end -- if nothing is active, means that ethernet is not connected
+    if ethernet_and_wifi then self:ethernetWifi() return end -- if both are active, that means we don't need wifi
+
+    if noAction1 then logger:debug("Ethernet is ON, not doing anything...") end
+    if noAction2 then logger:debug("WiFi is ON, not doing anything...") end
+    if unknown then logger:warning("Unknown state, not doing anything...") end
 end
 
---- Starts the timer to check the interfaces
+function Connection:callbackJob()
+    self.config:setCallback(function(store, keys)
+        self.dateTime:updateNow()
+        local current_time = self.dateTime:strftime(fullDateFormat)
+        logger:debug("-- Checking interfaces at datetime: ${t}" % {t=str(current_time)})
+        self:checkInterfaces()
+    end)
+end
+
 function Connection:start()
-    self.dateTime:updateNow()
-    local current_time = self.dateTime:strftime(fullDateFormat)
-    logger:debug("-- Checking interfaces at datetime: ${t}" % {t=str(current_time)})
     self:checkInterfaces()
-    hs.timer.doAfter(WAIT_TIME, function() self:start() end)
+    self:callbackJob()
+    self.config:monitorKeys({ethernetKey, wifiKey, globalIPv4})
+    self.config:start()
 end
 
 
