@@ -1,7 +1,7 @@
 ---@diagnostic disable: undefined-field, need-check-nil
 ---@alias Optional nil
 
-local class = require('classes.30log')
+local class = require('classes.class')
 ---@class Hyper
 ---@field hyperModeActive boolean
 ---@field commands table

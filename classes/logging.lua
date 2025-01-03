@@ -1,4 +1,4 @@
-local class = require('classes.30log')
+local class = require('classes.class')
 
 ---@class Logger
 ---@field private logfile file*

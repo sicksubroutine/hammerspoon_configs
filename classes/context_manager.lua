@@ -1,4 +1,4 @@
-local class = require("classes.30log")
+local class = require("classes.class")
 
 ---@class Context
 ---@field private cleanup fun(self: Context): nil

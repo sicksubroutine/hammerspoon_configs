@@ -21,7 +21,7 @@ local function turnOnWifi()
 end
 
 
-local class = require('classes.30log')
+local class = require('classes.class')
 local settingsManager = require("classes.settings")
 --- @class Connection 
 --- @field settings SettingsManager
@@ -118,11 +118,12 @@ function Connection:resetState()
     self.ethernet = false
     self.settings:set("wifi", false)
     self.settings:set("ethernet", false)
-    self.settings:set("last_checked", 0)
+    self.settings:set("last_checked", -1)
 end
 
 function Connection:noInterfaces()
     logger:debug("No interfaces connected, turning on WiFi")
+    turnOffWiFi()
     turnOnWifi()
 end
 
@@ -149,7 +150,7 @@ function Connection:checkInterfaces()
     -- We will actually take action here
     if no_interfaces then self:noInterfaces() return end -- if nothing is active, means that ethernet is not connected
     if ethernet_and_wifi then self:ethernetWifi() return end -- if both are active, that means we don't need wifi
-
+    -- The following are just for logging purposes
     if noAction1 then logger:debug("Ethernet is ON, not doing anything...") end
     if noAction2 then logger:debug("WiFi is ON, not doing anything...") end
     if unknown then logger:warning("Unknown state, not doing anything...") end
@@ -167,7 +168,7 @@ end
 function Connection:start()
     self:checkInterfaces()
     self:callbackJob()
-    self.config:monitorKeys({ethernetKey, wifiKey, globalIPv4})
+    self.config:monitorKeys()
     self.config:start()
 end
 

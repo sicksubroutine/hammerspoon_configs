@@ -1,4 +1,4 @@
-local class = require('classes.30log')
+local class = require('classes.class')
 
 ---A class for working with lines of strings.
 ---@class Lines

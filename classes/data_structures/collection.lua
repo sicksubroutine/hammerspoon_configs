@@ -1,5 +1,5 @@
 ---@diagnostic disable: param-type-mismatch
-local class = require('classes.30log')
+local class = require('classes.class')
 
 ---@class CollectionInstance
 ---@field data table

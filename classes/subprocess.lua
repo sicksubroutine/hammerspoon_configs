@@ -1,4 +1,4 @@
-local class = require('classes.30log')
+local class = require('classes.class')
 ---@class Subprocess
 local Subprocess = class("Subprocess")
 

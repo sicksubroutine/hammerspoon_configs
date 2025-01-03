@@ -1,7 +1,7 @@
 ---@class Class
----@field name string
+---@field _className string
 ---@field super Class|nil
----@field extend fun(self: Class, name: string, extra_params?: table): Class
+---@field extend fun(self: Class, _className: string, extra_params?: table): Class
 ---@field new fun(self: Class, ...): Instance
 ---@field create fun(self: Class, ...): Instance
 ---@field init fun(self: Instance, ...)|table|nil
@@ -19,7 +19,7 @@
 ---@field instanceOf fun(self: Instance, fromclass: Class): boolean
 ---@field cast fun(self: Instance, toclass: Class): Instance
 
----@type fun(name?: string, attr?: table): Class
+---@type fun(_className?: string, attr?: table): Class
 local _class
 
 
@@ -85,13 +85,13 @@ local function instantiate(call_init, self, ...)
 	return instance
 end
 
-local function extend(self, name, extra_params)
+local function extend(self, _className, extra_params)
 	assert_call_from_class(self, 'extend(...)')
 	local heir = {}
 	_classes[heir] = tostring(heir)
 	self.__subclasses[heir] = true
 	deep_copy(extra_params, deep_copy(self, heir))
-	heir.name    = extra_params and extra_params.name or name
+	heir._className    = extra_params and extra_params._className or _className
 	heir.__index = heir
 	heir.super   = self
 	heir.mixins = {}
@@ -103,11 +103,11 @@ baseMt = {
 	
 	__tostring = function(self,...)
 		if _instances[self] then
-			return ("instance of '%s' (%s)"):format(rawget(self.class,'name') 
+			return ("instance of '%s' (%s)"):format(rawget(self.class,'_className') 
 								or '?', _instances[self])
 		end
 		return _classes[self] 
-							and ("class '%s' (%s)"):format(rawget(self,'name')
+							and ("class '%s' (%s)"):format(rawget(self,'_className')
 							or '?',
 					_classes[self]) or self
 	end
@@ -121,10 +121,10 @@ local class = {
 	isInstance = function(t) return not not _instances[t] end,
 }
 
-_class = function(name, attr)
+_class = function(_className, attr)
 	local c = deep_copy(attr)
 	_classes[c] = tostring(c)
-	c.name = name or c.name
+	c._className = _className or c._className
 	c.__tostring = baseMt.__tostring
 	c.__call = baseMt.__call
 	c.new = bind(instantiate, true)
@@ -213,9 +213,9 @@ _class = function(name, attr)
 			local classes = self:subclasses()
 			classes[#classes + 1] = self
 			for _, class in ipairs(classes) do
-				for method_name, method in pairs(mixin) do
+				for method__className, method in pairs(mixin) do
 					if type(method) == 'function' then 
-						class[method_name] = nil 
+						class[method__className] = nil 
 					end
 				end
 			end
@@ -231,5 +231,5 @@ class._VERSION     = '30log v1.3.0'
 class._URL         = 'http://github.com/Yonaba/30log'
 class._LICENSE     = 'MIT LICENSE <http://www.opensource.org/licenses/mit-license.php>'
 
----@type {isClass: fun(t: any): boolean, isInstance: fun(t: any): boolean, __call: fun(_, name?: string, attr?: table): Class}
+---@type {isClass: fun(t: any): boolean, isInstance: fun(t: any): boolean, __call: fun(_, _className?: string, attr?: table): Class}
 return setmetatable(class,{__call = function(_,...) return _class(...) end })

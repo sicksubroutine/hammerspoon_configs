@@ -1,4 +1,4 @@
-local class = require('classes.30log')
+local class = require('classes.class')
 local dict = require('classes.data_structures.dict')
 
 ---@class JsonHelp

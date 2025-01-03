@@ -1,5 +1,12 @@
-require("globals")
+hs.console.consoleFont({name="JetBrainsMono Nerd Font", size=15})
+hs.consoleOnTop(false)
+if hs.console.darkMode() then
+    hs.console.outputBackgroundColor{ white = 0 }
+    hs.console.consoleCommandColor{ white = 1 }
+    hs.console.alpha(1)
+end
 
+require("globals")
 local dt = DateTime.now()
 
 print("-- Starting Loading the config at ${d}" % {d = str(dt:strftime(timeOnlyFormat))} )
@@ -12,5 +19,3 @@ end)
 dt:updateNow()
 print("-- Reached the end of the config at ${d}" % {d = str(dt:strftime(timeOnlyFormat))} )
 hs.alert.show("Config loaded")
-
-hs.consoleOnTop(false)

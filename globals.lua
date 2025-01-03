@@ -27,13 +27,19 @@ require("classes.context_manager")
 require("classes.pathlib")
 require("helpers")
 require("classes.json_help")
-require("classes.dataclass")
 require("classes.datetime")
-local bPrint = print
+bPrint = print
 _G.print = function(...)
     local args = {...}
-    local message = table.concat(args, "\t")
-    if string.match(message:lower(), "error") then logger:error(message) else logger:info(message) end
+    --It is possible a table that cannot be printed, need to use bPrint if so
+    for _, v in ipairs(args) do
+        if type(v) == "table" and v.class and v.class._className then
+            bPrint(...)
+            return
+        end
+    end
+    local msg = table.concat(args, "\t")
+    logger[string.match(msg:lower(), "error") and "error" or "info"](logger, msg)
     bPrint(...)
 end
 --[[#################################]]--
@@ -58,6 +64,20 @@ fullDateFormat = "%m-%d-%Y %I:%M:%S %p"
 dateOnlyFormat = "%m-%d-%Y"
 timeOnlyFormat = "%I:%M:%S %p"
 
+---@class Globals
+---@field jSettings table
+---@field jData table
+---@field debugSettings SettingsManager
+---@field HammerspoonPath string
+---@field LoggerFileName string
+---@field DebugMode boolean
+---@field HyperSymbol string
+---@field RaycastName string
+---@field HyperKey string[]
+---@field CmdAlt string[]
+---@field fullDateFormat string
+---@field dateOnlyFormat string
+---@field timeOnlyFormat string
 __setGlobals__({
     jSettings = jSettings,
     jData = jData,

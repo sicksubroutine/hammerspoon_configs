@@ -1,5 +1,6 @@
 ---@diagnostic disable: lowercase-global
-local class = require("classes.30log")
+local debugClasses = require("classes.debughelper")
+
 ---@param head string
 ---@param text string
 ---@param sepChar string | nil
@@ -9,114 +10,6 @@ function dPrint(head, text, sepChar)
   local header = "${s} ${h} ${s}\n" % {h=head, s=fiveSep}
   local footer = string.rep("#", #header)
   print("\n${s}\n${h}\n${t}\n${s}" % {s=footer, h=header, t=text})
-end
-
----@param str string The string to colorize
----@param colorName string The color name (red|green|yellow|blue|magenta|cyan|white)
----@return string colorized
-function colorStrToAnsiStr(str, colorName)
-  local endColor = "\27[0m"
-  local colorMap = {
-    red = 31,
-    green = 32,
-    yellow = 33,
-    blue = 34,
-    magenta = 35,
-    cyan = 36,
-    white = 37,
-  }
-  local color = "\27[${c}m" % {c=colorMap[colorName] or 37}
-  return "${c}${s}${e}" % {c=color, s=str, e=endColor}
-end
-
----@class DebugTheme
----@field title string
----@field prefix string | nil
----@field mid string | nil
----@field sep string | nil
----@field data table {title: string, value: string}
----@field theme table {title: string, prefix: string, mid: string, sep: string}
-DebugTheme = class("Debug Theme")
-
----Initializes a new DebugTheme instance
----@return DebugTheme
-function DebugTheme:init(data)
-  if type(data) == "table" then self:setAll(data) return self end
-  self.title = "Debug"
-  self.prefix = "-- "
-  self.mid = ": "
-  self.sep = "\n"
-  self.attrColor = "\033[0;36m"
-  self.valueColor = "\033[0m"
-  return self
-end
-
-function DebugTheme:set(key, value)
-  self[key] = value
-end
-
-function DebugTheme:setAll(data)
-  for k, v in pairs(data) do
-    self:set(k, v)
-  end
-end
-
----@class DebugLine
----@field title string
----@field value string
-DebugLine = class("DebugLine")
-
-function DebugLine:init(title, value)
-  self.title = title
-  self.value = value
-  return self
-end
-
----@class DebugTable
----@field title string
----@field prefix string
----@field mid string
----@field sep string
----@field data table {title: string, value: string}
-DebugTable = class("DebugTable")
-
----@alias DataPair {title: string, value: string}
----@alias ThemeConfig {title: string, prefix: string, mid: string, sep: string}
----@alias DebugTableInput {theme: DebugTheme, data: DataPair[]}
-
----Initializes a new DebugTable instance
----@param input DebugTableInput
----@return DebugTable
-function DebugTable:init(input)
-  local theme, data = input.theme, input.data
-  local localTheme = theme or DebugTheme()
-  self.title = localTheme.title
-  self.prefix = localTheme.prefix
-  self.mid = localTheme.mid
-  self.sep = localTheme.sep
-  self.attrColor = localTheme.attrColor
-  self.valueColor = localTheme.valueColor
-  self.data = self:setAll(data) or {}
-  return self
-end
-function DebugTable:setAll(data)
-  temp_data = {}
-  for k, v in pairs(data) do
-    table.insert(temp_data, DebugLine(k, v))
-  end
-  return temp_data
-end
-
-function DebugTable:prettySelf()
-  local str = ""
-  for _, v in pairs(self.data) do
-    str = "${s}${p}${t}${m}${v}${s2}" % {s=str, p=self.prefix, t=v.title, v=v.value, m=self.mid, s2=self.sep}
-  end
-  return str
-end
-
-function DebugTable:debugPrint()
-  dPrint(self.title, self:prettySelf())
 end
 
 --- Tries to define an easier way to create strings with variables
@@ -144,11 +37,6 @@ local function interp(s, tab)
   end
 -- Makes the above function available as a method on strings
 getmetatable("").__mod = interp
-
-local function debugPrint(...)
-  if DebugMode then print(...) end
-end
-
 function unixTimestamp()
   return os.time()
 end
@@ -202,10 +90,11 @@ function trimIndent(str)
   return rStr
 end
 
+
 __setGlobals__({
   unixTimestamp = unixTimestamp,
   str = str,
-  debugPrint = debugPrint,
+  debugPrint = dPrint,
   readFile = readFile,
   booltoStr = boolToStr,
   cleanStringTable = cleanStringTable,
@@ -213,6 +102,6 @@ __setGlobals__({
   dPrint = dPrint,
   split = split,
   strip = strip,
-  DebugTheme = DebugTheme,
-  DebugTable = DebugTable
+  DebugTheme = debugClasses.DebugTheme,
+  DebugTable = debugClasses.DebugTable,
 })
