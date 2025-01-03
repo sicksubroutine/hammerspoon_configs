@@ -56,13 +56,18 @@ function Hyper:registerCommand(name, key, action, showInMenu, menuTitle)
     }
 end
 
----Register a command object
----@param cmdObj Command
-function Hyper:regCmd(cmdObj)
-    for k, v in pairs(cmdObj) do
-        self.commands[k] = v
-    end
-end
+
+---Registers Command Object for Various Hyper Mode Commands
+-- function Hyper:registerCommand(cmd)
+--     self.commands[cmd.key] = {
+--         cmd.name = cmd.name,
+--         key = key,
+--         action = action,
+--         showInMenu = showInMenu or false,
+--         menuTitle = menuTitle or name
+--     }
+-- end
+
 
 
 --- comment Returns the event tap for the Hyper Mode

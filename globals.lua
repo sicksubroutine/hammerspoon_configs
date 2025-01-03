@@ -29,6 +29,7 @@ require("helpers")
 require("classes.json_help")
 require("classes.datetime")
 bPrint = print
+_G.printf = hs.printf
 _G.print = function(...)
     local args = {...}
     --It is possible a table that cannot be printed, need to use bPrint if so

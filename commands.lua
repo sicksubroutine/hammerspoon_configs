@@ -1,34 +1,41 @@
-local class = require('classes.class')
+local dataclasses = require("classes.dataclasses.dataclass")
+local field = dataclasses.field
+local dataclass = dataclasses.dataclass
 
----@class Command
+---@class Command: Dataclass
 ---@field name string
 ---@field key string
----@field action function | nil
+---@field action function
 ---@field showInMenu boolean
 ---@field menuTitle string
-local Command = class("Command")
+local Command = dataclass("Command", {
+        name = field "string" {required = true},
+        key = field "string" {required = true},
+        action = field "function" {required = false, hidden = true},
+        showInMenu = field "boolean" {required = false, default = false},
+        menuTitle = field "string" {required = false, default = nil}
+    },
+    {order=true}
+)
 
-function Command:init(cmdData)
-    self.name = cmdData.name or ""
-    self.key = cmdData.key or ""
-    self.action = cmdData.action or nil
-    self.showInMenu = cmdData.showInMenu or false
-    self.menuTitle = cmdData.menuTitle or self.name
-    return self
+function Command:__post_init()
+    if self.showInMenu then
+        self.menuTitle = self.menuTitle or self.name
+    end
+    --hyper:registerCommand(self)
 end
 
+local toggleHyperMode = Command({
+    name = "Toggle Hyper Mode",
+    key = "a",
+    action = function() hyper:toggleHyperMode() end,
+    showInMenu = true,
+    menuTitle = "❖ + A: Toggle Hyper Mode"
+})
 
----@comment Params for registering a command
--- function Hyper:registerCommand(name, key, action, showInMenu, menuTitle)
---     self.commands[key] = {
---         name = name,
---         key = key,
---         action = action,
---         showInMenu = showInMenu or false,
---         menuTitle = menuTitle or name
---     }
--- end
-
+--TODO: Get around to adding all commands as a Command object
+-- Still need to convert the registerCommand function to use the Command object
+-- then Bob's your uncled
 
 hyper:registerCommand(
     "Toggle Hyper Mode",
@@ -119,6 +126,17 @@ hyper:registerCommand(
     end,
     true,
     "❖ + C: Clear Log"
+)
+
+hyper:registerCommand(
+    "Sketchybar Restart",
+    "z",
+    function()
+        hs.alert.show("Restart Sketchybar")
+        hs.execute("brew services restart sketchybar", true) 
+    end,
+    true,
+    "❖ + S: Restart Sketchybar"
 )
 
 hyper:updateMenubar()
