@@ -43,26 +43,28 @@ function Connection:init()
     self.wifi = self.settings:get("wifi", false)
     self.ethernet = self.settings:get("ethernet", false)
     self.config = hs.network.configuration.open()
+    self.interfaceChangeAttempts = 0
+    self.maxChangeAttempts = 3
     logger:debug("-- Connection(WiFi: ${s.wifi}, Ethernet: ${s.ethernet})" % {s=self})
     return self
 end
 
 
---- Returns a boolean depending on if the time difference is greater than the wait timeout
----@return boolean
-function Connection:checkTime()
-    local last_checked = self.settings:get("last_checked", unixTimestamp())
-    last_checked = tonumber(last_checked)
-    local lastCheckedDT = DateTime.fromTimestamp(last_checked)
-    if not last_checked then
-        logger:debug("Last checked is nil")
-        self.settings:set("last_checked", unixTimestamp())
-        return true
-    end
-    self.dateTime:updateNow()
-    local difference = self.dateTime:compare(lastCheckedDT)
-    return difference > WAIT_TIME
-end
+-- --- Returns a boolean depending on if the time difference is greater than the wait timeout
+-- ---@return boolean
+-- function Connection:checkTime()
+--     local last_checked = self.settings:get("last_checked", unixTimestamp())
+--     last_checked = tonumber(last_checked)
+--     local lastCheckedDT = DateTime.fromTimestamp(last_checked)
+--     if not last_checked then
+--         logger:debug("Last checked is nil")
+--         self.settings:set("last_checked", unixTimestamp())
+--         return true
+--     end
+--     self.dateTime:updateNow()
+--     local difference = self.dateTime:compare(lastCheckedDT)
+--     return difference > WAIT_TIME
+-- end
 
 --- Returns a boolean depending on if the WiFi status has changed
 ---@return boolean
@@ -141,6 +143,11 @@ function Connection:checkInterfaces()
 
     logger:debug("Current States - WiFi: ${w}, Ethernet: ${e}" % {w=str(wifi_status), e=str(ethernet_status)})
 
+    if self.interfaceChangeAttempts >= self.maxChangeAttempts then
+        logger:debug("Max attempts reached, backing off...")
+        return
+    end
+
     local no_interfaces = not wifi_status and not ethernet_status
     local ethernet_and_wifi = wifi_status and ethernet_status
     local noAction1 = ethernet_status and not wifi_status
@@ -148,7 +155,10 @@ function Connection:checkInterfaces()
     local unknown = not no_interfaces and not ethernet_and_wifi and not noAction1 and not noAction2
 
     -- We will actually take action here
-    if no_interfaces then self:noInterfaces() return end -- if nothing is active, means that ethernet is not connected
+    if no_interfaces then
+        self.interfaceChangeAttempts = self.interfaceChangeAttempts + 1
+        self:noInterfaces()
+    return end -- if nothing is active, means that ethernet is not connected
     if ethernet_and_wifi then self:ethernetWifi() return end -- if both are active, that means we don't need wifi
     -- The following are just for logging purposes
     if noAction1 then logger:debug("Ethernet is ON, not doing anything...") end
@@ -165,11 +175,18 @@ function Connection:callbackJob()
     end)
 end
 
+function Connection:connectionAttemptReset()
+    self.interfaceChangeAttempts = 0
+end
+
 function Connection:start()
     self:checkInterfaces()
     self:callbackJob()
     self.config:monitorKeys()
     self.config:start()
+    hs.timer.doAfter(300, function()
+        self:connectionAttemptReset()
+    end)
 end
 
 
