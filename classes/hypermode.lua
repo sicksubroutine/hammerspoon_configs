@@ -16,6 +16,7 @@ local Hyper = class({ name = "Hyper" })
 ---@field action function
 ---@field showInMenu boolean
 ---@field menuTitle string|nil
+---@field disabled boolean
 
 --- comment Initialized the Hyper class
 --- @return Hyper | Optional
@@ -46,7 +47,7 @@ function Hyper:onInit()
 end
 
 
-function Hyper:registerCommand(name, key, action, showInMenu, menuTitle)
+function Hyper:registerCommandAlt(name, key, action, showInMenu, menuTitle)
     self.commands[key] = {
         name = name,
         key = key,
@@ -58,15 +59,9 @@ end
 
 
 ---Registers Command Object for Various Hyper Mode Commands
--- function Hyper:registerCommand(cmd)
---     self.commands[cmd.key] = {
---         cmd.name = cmd.name,
---         key = key,
---         action = action,
---         showInMenu = showInMenu or false,
---         menuTitle = menuTitle or name
---     }
--- end
+function Hyper:registerCommand(cmd)
+    self.commands[cmd.key] = cmd
+end
 
 
 
@@ -199,68 +194,15 @@ local function compFlags(pattern, flags)
     return true
 end
 
----comment String comparison for hyper key checks
----@param key string
----@return boolean
-function Hyper:hyperKeyChecks(key)
-    if key == "a" then
-        self:toggleHyperMode()
-        return true
-    elseif key == "r" then
-        hs.reload()
-        return true
-    elseif key == "n" then
-        hs.alert.show("Rebuilding Nix Darwin Configuration, please standby...")
-        --hs.execute("open ~/.hammerspoon/__hammerspoon.log")
-        local cmd = "darwin-rebuild switch --flake ~/.config/nix/#pluto"
-        hs.timer.doAfter(1, function()
-            local output, _, _ = hs.execute(cmd, true)
-            logger:debug("Debug output for Nix Rebuild"..output)
-        end)
-        return true
-    elseif key == "s" then
-        hs.timer.doAfter(0.1, function()
-            local output, _, _ = hs.execute("sketchybar --reload", true)
-        end)
-        return true
-    end
-    return false
-end
+function Hyper:ignoreKeys() return false end
 
---- Handles key events for when the hyper mode is active
----@param keyPressed number | string
----@return boolean
-function Hyper:whileHyperModeActive(keyPressed)
-    debugPrint("Processing active hyper mode key: " .. tostring(keyPressed))
-    if keyPressed == "a" then
-        hs.alert.show("Hyper A")
-        return true
-    elseif keyPressed == "r" then
-        hs.reload()
-        return true
-    elseif keyPressed == "k" then
-        print("Killing Hammerspoon")
-        hs.alert.show("Killing Hammerspoon")
-        hs.execute("killall Hammerspoon")
-        return true
-    elseif keyPressed == "space" then
-        print("Launching Raycast")
-        hs.application.launchOrFocus(RaycastName)
-        self:toggleHyperMode()
-        return true
-    end
-    return false
-end
-
-function Hyper:ignoreKeys()
-    return false
-end
-
+-- TODO: Implement the mouse button handling eventually
 function Hyper:handleMouseEvent(event, buttonNumber)
     hs.alert.show("Mouse Button: " .. tostring(buttonNumber))
     return false
 end
 
+-- TODO: Implement the key up event handling eventually maybe... if you're good. Are you good?
 function Hyper:handleKeyUpEvent(event, key)
     hs.alert.show("Key Up Event: " .. key)
     return false
@@ -312,55 +254,17 @@ function Hyper:handleKeyEvent(event, eventType)
         return false
     end
     
-
     if not hyperKey or self.hyperModeActive then
         return false
     end
     return self:executeCommand(keyPressed)
-
-    -- if self.vncMode then
-    --     if keyPressed == "tab" then
-    --         -- /Users/chaz/.hammerspoon/sendSubprocess
-    --         -- run the subprocess in shell
-    --         local script = "/Users/chaz/.hammerspoon/sendSubprocess"
-
-    --         local altDown = "alt keydown"
-    --         local altDownCmd = "${s} ${k}" % { s = script, k = altDown }
-    --         local altUp = "alt keyup"
-    --         local altUpCmd = "${s} ${k}" % { s = script, k = altUp }
-    --         local tabDown = "tab keydown"
-    --         local tabDownCmd = "${s} ${k}" % { s = script, k = tabDown }
-    --         local tabUp = "tab keyup"
-    --         local tabUpCmd = "${s} ${k}" % { s = script, k = tabUp }
-
-    --         hs.execute(altDownCmd, true)
-    --         hs.execute(tabDownCmd, true)
-
-    --         hs.timer.doAfter(0.1, function()
-    --             hs.execute(tabUpCmd, true)
-    --         end)
-    --         return true
-    --     end
-        
-    --     -- if cmd then
-    --     -- --     hs.alert.show("VNC Mode Cmd Key Pressed")
-    --     -- --     --return self:xdotoolInterface()
-    --     -- --     return false
-    --     -- -- elseif alt then
-    --     -- --     if keyPressed == "tab" then
-    --     -- --         hs.alert.show("VNC Mode Alt-Tab")
-    --     -- --         print("VNC Mode Alt-Tab")
-    --     -- --         self:xdotoolInterface("alt-Tab")
-    --     -- --         return true
-    --     -- --     end
-    --     -- --     return false
-    --     -- end
-    --     return false
-    -- end
 end
 
 function Hyper:executeCommand(key)
     local command = self.commands[key]
+    if command.disabled then
+        return false
+    end
     if command then
         command.action()
         return true

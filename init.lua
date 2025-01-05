@@ -1,5 +1,5 @@
 hs.console.consoleFont({name="JetBrainsMono Nerd Font", size=15})
-hs.consoleOnTop(false)
+hs.consoleOnTop(true)
 if hs.console.darkMode() then
     hs.console.outputBackgroundColor{ white = 0 }
     hs.console.consoleCommandColor{ white = 1 }

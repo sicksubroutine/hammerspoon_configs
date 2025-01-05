@@ -13,7 +13,8 @@ local Command = dataclass("Command", {
         key = field "string" {required = true},
         action = field "function" {required = false, hidden = true},
         showInMenu = field "boolean" {required = false, default = false},
-        menuTitle = field "string" {required = false, default = nil}
+        menuTitle = field "string" {required = false, default = nil},
+        disabled = field "boolean" {required = false, default = false}
     },
     {order=true}
 )
@@ -22,41 +23,30 @@ function Command:__post_init()
     if self.showInMenu then
         self.menuTitle = self.menuTitle or self.name
     end
-    --hyper:registerCommand(self)
+    hyper:registerCommand(self)
 end
 
-local toggleHyperMode = Command({
+Command({
     name = "Toggle Hyper Mode",
     key = "a",
-    action = function() hyper:toggleHyperMode() end,
+    action = function() hyper:toggleHyperMode() end,    
     showInMenu = true,
-    menuTitle = "❖ + A: Toggle Hyper Mode"
+    menuTitle = "❖ + A: Toggle Hyper Mode",
+    disabled = true
 })
 
---TODO: Get around to adding all commands as a Command object
--- Still need to convert the registerCommand function to use the Command object
--- then Bob's your uncled
+Command({
+    name = "Reload Configuration",
+    key = "r",
+    action = function() hs.reload() end,
+    showInMenu = true,
+    menuTitle = "❖ + R: Reload Configuration"
+})
 
-hyper:registerCommand(
-    "Toggle Hyper Mode",
-    "a",
-    function() hyper:toggleHyperMode() end,
-    true,
-    "❖ + A: Toggle Hyper Mode"
-)
-
-hyper:registerCommand(
-    "Reload Configuration",
-    "r",
-    function() hs.reload() end,
-    true,
-    "❖ + R: Reload Configuration"
-)
-
-hyper:registerCommand(
-    "Rebuild NixOS",
-    "n",
-    function() 
+Command({
+    name = "Rebuild NixOS",
+    key = "n",
+    action = function()
         hs.alert.show("Rebuilding Nix Darwin Configuration, please standby...")
         local cmd = "darwin-rebuild switch --flake ~/.config/nix/#pluto"
         hs.timer.doAfter(1, function()
@@ -64,25 +54,30 @@ hyper:registerCommand(
             logger:debug("Debug output for Nix Rebuild"..output)
         end)
     end,
-    true,
-    "❖ + N: Rebuild NixOS Configuration"
-)
+    showInMenu = true,
+    menuTitle = "❖ + N: Rebuild NixOS Configuration"
+})
 
-hyper:registerCommand(
-    "Launch Raycast",
-    "space",
-    function()
-        hs.application.launchOrFocus(RaycastName)
-        hyper.setMode(false)
-    end,
-    true,
-    "❖ + Space: Launch Raycast"
-)
+Command({
+    name = "Launch Raycast",
+    key = "space",
+    action = function() hs.application.launchOrFocus(RaycastName) end,
+    showInMenu = true,
+    menuTitle = "❖ + Space: Launch Raycast"
+})
 
-hyper:registerCommand(
-    "Debug Mode Toggle",
-    "d",
-    function()
+Command({
+    name = "Launch iTerm",
+    key = "t",
+    action = function() hs.application.launchOrFocus("iTerm") end,
+    showInMenu = true,
+    menuTitle = "❖ + T: Launch iTerm"
+})
+
+Command({
+    name = "Debug Mode Toggle",
+    key = "d",
+    action = function()
         jSettings:set("debug", not jSettings:get("debug"))
         jSettings:write(true)
         local debug = jSettings:get("debug")
@@ -92,51 +87,33 @@ hyper:registerCommand(
             hs.reload()
         end)
     end,
-    true,
-    "❖ + D: Toggle Debug Mode"
-)
+    showInMenu = true,
+    menuTitle = "❖ + D: Toggle Debug Mode"
+})
 
-hyper:registerCommand(
-    "Hyper Mode Toggle", -- Disable Hyper Mode For Now
-    "h",
-    function()
-        jSettings:set("hyper", not jSettings:get("hyper"))
-        jSettings:write(true)
-        local hyper = jSettings:get("hyper")
-        if hyper then hs.alert.show("hyper Mode is on") else hs.alert.show("hyper Mode is off") end
-        -- wait a second
-        hs.timer.doAfter(1, function()
-            hs.reload()
-        end)
-    end,
-    true,
-    "❖ + D: Toggle Debug Mode"
-)
-
-
-hyper:registerCommand(
-    "Clear Log",
-    "c",
-    function()
+Command({
+    name = "Clear Log",
+    key = "c",
+    action = function()
         logger:clear()
         hs.alert.show("Log Cleared")
         hs.timer.doAfter(1, function()
             hs.reload()
         end)
     end,
-    true,
-    "❖ + C: Clear Log"
-)
+    showInMenu = true,
+    menuTitle = "❖ + C: Clear Log"
+})
 
-hyper:registerCommand(
-    "Sketchybar Restart",
-    "z",
-    function()
+Command({
+    name = "Restart Sketchybar",
+    key = "z",
+    action = function()
         hs.alert.show("Restart Sketchybar")
-        hs.execute("brew services restart sketchybar", true) 
+        hs.execute("sketchybar --reload", true) 
     end,
-    true,
-    "❖ + S: Restart Sketchybar"
-)
+    showInMenu = true,
+    menuTitle = "❖ + S: Restart Sketchybar"
+})
 
 hyper:updateMenubar()

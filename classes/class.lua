@@ -22,7 +22,6 @@
 ---@type fun(_className?: string, attr?: table): Class
 local _class
 
-
 local next         = next
 local assert       = assert
 local pairs        = pairs
