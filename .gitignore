@@ -2,3 +2,4 @@
 **/Spoons
 *.json
 console/.hammerspoon_console_history
+**/_commands.lua

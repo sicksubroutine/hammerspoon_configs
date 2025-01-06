@@ -7,10 +7,12 @@ if hs.console.darkMode() then
 end
 
 require("globals")
-local docker_handler = require("classes.dock_handler")
+if jSettings:get("vnc", false) then
+    local docker_handler = require("classes.dock_handler")
 
-local dockHandler = docker_handler({"VNC Viewer"}, 0.0001, 1000, 5)
-dockHandler:start()
+    local dockHandler = docker_handler({"VNC Viewer"}, 0.0001, 1000, 5)
+    dockHandler:start()
+end
 
 local dt = DateTime.now()
 

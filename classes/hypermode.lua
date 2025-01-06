@@ -27,7 +27,9 @@ function Hyper:init()
     self.keyDownTracker = self:returnKeyDownTracker()
     self.keyUpTracker = self:returnKeyUpTracker()
     --self.mouseButtonTracker = self:returnMouseButtonDownTracker()
-    self.vncWatcher = self:vncModeCheck() -- Check if VNC Viewer is in focus
+    if jSettings:get("vnc", false) then
+        self.vncWatcher = self:vncModeCheck() -- Check if VNC Viewer is in focus
+    end
     self.menubarItem = hs.menubar.new()
     if not self.menubarItem then
         hs.alert.show("Failed to create menubar item")
@@ -93,6 +95,7 @@ end
 ---Check if VNC Viewer is running and set the vncMode to true
 ---@return hs.application.watcher | nil
 function Hyper:vncModeCheck()
+    if not jSettings:get("vnc", false) then return nil end
     local vncWatcher = hs.application.watcher.new(function(name, event, app)
         if name == "VNC Viewer" then
             if event == hs.application.watcher.activated then

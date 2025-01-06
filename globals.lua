@@ -46,7 +46,7 @@ end
 --[[#################################]]--
 
 jSettings = jsonI(Path("~/.hammerspoon/settings.json"), "jSettings")
-jData = jSettings:getData() --{"connect": false, "hyper": true, "debug": false, "clear": true}
+jData = jSettings:getData() --{"connect": false, "hyper": true, "debug": false, "clear": true, "vnc": false}
 logger:debug(jSettings:pretty(", "))
 
 local debug = jSettings:get("debug", false)

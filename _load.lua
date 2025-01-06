@@ -13,7 +13,7 @@ if jSettings:get("hyper", false) then
         hs.hotkey.bind({}, "F17", function()
             hyper:toggleHyperMode()
         end)
-        require("commands")
+        require("_commands")
     else
         hs.alert.show("Failed to initialize Hyper Mode")
     end
