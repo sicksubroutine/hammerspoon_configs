@@ -37,9 +37,8 @@ local function interp(s, tab)
   end
 -- Makes the above function available as a method on strings
 getmetatable("").__mod = interp
-function unixTimestamp()
-  return os.time()
-end
+
+function unixTimestamp() return os.time() end
 
 _G.str = tostring
 

@@ -7,6 +7,11 @@ if hs.console.darkMode() then
 end
 
 require("globals")
+local docker_handler = require("classes.dock_handler")
+
+local dockHandler = docker_handler({"VNC Viewer"}, 0.0001, 1000, 5)
+dockHandler:start()
+
 local dt = DateTime.now()
 
 print("-- Starting Loading the config at ${d}" % {d = str(dt:strftime(timeOnlyFormat))} )

@@ -1,6 +1,6 @@
 local ethernetKey = "State:/Network/Interface/en6/Link"
 local wifiKey = "State:/Network/Interface/en0/Link"
-local globalIPv4 = "State:/Network/Global/IPv4"
+--local globalIPv4 = "State:/Network/Global/IPv4"
 -- Private functions --
 --- Uses Osascript to turn off the Wi-Fi
 ---@return nil
