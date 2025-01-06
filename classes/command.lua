@@ -25,3 +25,5 @@ function Command:__post_init()
     end
     hyper:registerCommand(self)
 end
+
+return Command

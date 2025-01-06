@@ -24,7 +24,3 @@ end)
 dt:updateNow()
 print("-- Reached the end of the config at ${d}" % {d = str(dt:strftime(timeOnlyFormat))} )
 hs.alert.show("Config loaded")
-
-while true do
-    coroutine.yield()
-end
