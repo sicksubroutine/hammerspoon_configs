@@ -42,7 +42,9 @@ end
 
 function Hyper:onInit()
     self:updateMenubar()
-    self.vncWatcher:start()
+    if jSettings:get("vnc", false) then
+        self.vncWatcher:start()
+    end
     self.keyDownTracker:start()
     self.keyUpTracker:start()
     --self.mouseButtonTracker:start()
