@@ -1,3 +1,10 @@
+hs.console.consoleFont({name="JetBrainsMono Nerd Font", size=19})
+hs.consoleOnTop(false)
+if hs.console.darkMode() then
+    hs.console.outputBackgroundColor{ white = 0 }
+    hs.console.consoleCommandColor{ white = 1 }
+    hs.console.alpha(1)
+end
 ---@diagnostic disable: lowercase-global, need-check-nil
 DebugMode = false
 HammerspoonPath = ""
@@ -61,6 +68,9 @@ local settingsManager = require("classes.settings")
 
 ---@class SettingsManager
 debugSettings = settingsManager("debugSettings", debug)
+
+local hammerSpoonPath = Path("~/.hammerspoon/")
+
 
 debugSettings:setAll({
     debug_mode = debug,

@@ -1,5 +1,5 @@
 local class = require('classes.class')
-local file = require('classes.context_manager')
+require('classes.context_manager')
 
 ---@class Path
 ---@field private path string
@@ -70,6 +70,10 @@ end
 ---@return string
 function Path:repr()
     return "Path(path=" .. self.path ..", exists="..tostring(self._exists)..", isFile="..tostring(self._isFile)..", isDir="..tostring(self._isDir)..")"
+end
+
+function Path:__tostring()
+    return tostring(self.path)
 end
 
 function Path:update()

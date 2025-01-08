@@ -10,7 +10,7 @@ if jSettings:get("hyper", false) then
     local hyper = require("classes.hypermode")()
     if hyper then
         _G.hyper = hyper
-        hs.alert.show("HyperMode Initialized")
+        --hs.alert.show("HyperMode Initialized")
         hs.hotkey.bind({}, "F17", function()
             hyper:toggleHyperMode()
         end)

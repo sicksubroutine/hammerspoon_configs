@@ -1,26 +1,20 @@
-hs.console.consoleFont({name="JetBrainsMono Nerd Font", size=19})
-hs.consoleOnTop(true)
-if hs.console.darkMode() then
-    hs.console.outputBackgroundColor{ white = 0 }
-    hs.console.consoleCommandColor{ white = 1 }
-    hs.console.alpha(1)
-end
-
 require("globals")
-if jSettings:get("vnc", false) then
-    local docker_handler = require("classes.dock_handler")
-
-    local dockHandler = docker_handler({"VNC Viewer"}, 0.0001, 1000, 5)
-    dockHandler:start()
-end
-
 local _print = function(text) print("-- [init] " .. text) end
-
 local dt = DateTime.now()
-
 _print("Starting Loading the config at ${d}" % {d = str(dt:strftime(timeOnlyFormat))} )
-require("classes.reload")():start()
+
 with(Timer("Another operation"), function(t)
+    local reload = require("classes.reload")
+    local hsPath = Path(hs.configdir)
+    local reloadInstance = reload(hsPath)
+    reloadInstance:start()
+
+    if jSettings:get("vnc", false) then
+        local docker_handler = require("classes.dock_handler")
+    
+        local dockHandler = docker_handler({"VNC Viewer"}, 0.0001, 1000, 5)
+        dockHandler:start()
+    end
     require("_load")
     _print("Time taken: "..t:format_elapsed())
 end)

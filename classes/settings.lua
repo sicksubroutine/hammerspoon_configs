@@ -12,6 +12,8 @@ local SettingsManager = class("Settings")
 function SettingsManager:init(name, debug)
     self.prefix = name and name .. "." or ""
     self.debug = debug or false
+    self.print = function(text) print("-- [SettingsManager.${name}] ${t}" % {name=name, t=text}) end
+    self.print("Initialized")
     logger:debug("-- New SettingsManager Created: (${n})" % {n=name})
     return self
 end
