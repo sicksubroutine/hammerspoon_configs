@@ -1,4 +1,4 @@
-hs.console.consoleFont({name="JetBrainsMono Nerd Font", size=15})
+hs.console.consoleFont({name="JetBrainsMono Nerd Font", size=19})
 hs.consoleOnTop(true)
 if hs.console.darkMode() then
     hs.console.outputBackgroundColor{ white = 0 }
@@ -14,15 +14,17 @@ if jSettings:get("vnc", false) then
     dockHandler:start()
 end
 
+local _print = function(text) print("-- [init] " .. text) end
+
 local dt = DateTime.now()
 
-print("-- Starting Loading the config at ${d}" % {d = str(dt:strftime(timeOnlyFormat))} )
+_print("Starting Loading the config at ${d}" % {d = str(dt:strftime(timeOnlyFormat))} )
 require("classes.reload")():start()
 with(Timer("Another operation"), function(t)
     require("_load")
-    print("-- Time taken: "..t:format_elapsed())
+    _print("Time taken: "..t:format_elapsed())
 end)
 
 dt:updateNow()
-print("-- Reached the end of the config at ${d}" % {d = str(dt:strftime(timeOnlyFormat))} )
+_print("Reached the end of the config at ${d}" % {d = str(dt:strftime(timeOnlyFormat))} )
 hs.alert.show("Config loaded")

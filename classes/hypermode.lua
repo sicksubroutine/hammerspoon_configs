@@ -36,7 +36,8 @@ function Hyper:init()
         return nil
     end
     self:onInit()
-    print("-- HyperMode Initialized")
+    self.print = function(text) print("-- [Hyper] " .. text) end
+    self.print("HyperMode Initialized")
     return self
 end
 

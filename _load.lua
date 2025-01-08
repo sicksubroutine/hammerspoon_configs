@@ -1,7 +1,8 @@
+local _print = function(text) print("-- [_load] " .. text) end
 --[[####### Connection Related ######]]--
 if jSettings:get("connect", false) then
     require('classes.connection')():start()
-    print("-- Connection Mode is on")
+    _print("Connection Mode is on")
 end
 --[[#################################]]--
 --[[####### Keyboard Related ########]]--
@@ -17,6 +18,7 @@ if jSettings:get("hyper", false) then
     else
         hs.alert.show("Failed to initialize Hyper Mode")
     end
+    print("HyperMode is on")
 else
     hs.hotkey.bind(HyperKey, "h", function()
         jSettings:set("hyper", not jSettings:get("hyper"))

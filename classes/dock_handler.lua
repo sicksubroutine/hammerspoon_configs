@@ -18,6 +18,8 @@ function DockHandler:init(app_to_block, default_delay, vnc_delay, wait_time)
     self.lastTimeUpdated = self.settings:get("last_time_settings_updated", 0)
     self.currentDelay = self.settings:get("current_delay", self.default_delay)
     self.appWatcher = nil
+    self.print = function(text) print("-- [DockHandler] "..text) end
+    self.print("DockHandler Initialized")
     return self
 end
 
@@ -40,7 +42,7 @@ function DockHandler:updateSettings(delay)
     local currentTime = os.time()
     self.settings:set("last_time_settings_updated", currentTime)
     self.lastTimeUpdated = currentTime
-    if delay == self.currentDelay then return end
+    if delay == self.currentDelay then self.print("Value is the same") return end
     self.settings:set("current_delay", delay)
     self.setDockDelay(delay)
 end
@@ -48,9 +50,9 @@ end
 function DockHandler.appWatcherCallback(self, appName, eventType)
     if not self:checkUpdateTime() then return end
     if eventType == hs.application.watcher.activated then
-        print("Current app Focused: ${a}" % {a = appName})
+        self.print("Current app Focused: ${a}" % {a = appName})
         if hs.fnutils.contains(self.app_to_block, appName) then
-            print("VNC Viewer is in focus, setting delay to: ${d}" % {d = self.vnc_delay})
+            self.print("VNC Viewer is in focus, setting delay to: ${d}" % {d = self.vnc_delay})
             self:updateSettings(self.vnc_delay)
         else
             self:updateSettings(self.default_delay)

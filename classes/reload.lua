@@ -6,12 +6,13 @@ local Reload = class("Reload")
 function Reload:init()
     self.files = nil
     self.doReload = false
-    print("-- Reload initialized")
+    self.print = function(text) print("-- [Reload] " .. text) end
+    self.print("Reload initialized")
     return self
 end
 
 function Reload:start()
-    print("-- Reload Start initialized")
+    self.print("Reload Start initialized")
     hs.pathwatcher.new(HammerspoonPath, function(files)
         --- @type string[] files
         self:setterFiles(files)

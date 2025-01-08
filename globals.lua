@@ -32,16 +32,23 @@ bPrint = print
 _G.printf = hs.printf
 _G.print = function(...)
     local args = {...}
-    --It is possible a table that cannot be printed, need to use bPrint if so
+
     for _, v in ipairs(args) do
         if type(v) == "table" and v.class and v.class._className then
             bPrint(...)
             return
         end
     end
+
     local msg = table.concat(args, "\t")
+    
     logger[string.match(msg:lower(), "error") and "error" or "info"](logger, msg)
-    bPrint(...)
+    if not string.match(msg, "%[.*%]") then
+        msg = msg:gsub("^%s*-+%s*", ""):gsub("%s*-+%s*$", "")
+        msg = "-- [hs] " .. msg
+    end
+    msg = msg:gsub("%s+", " "):gsub("^%s*(.-)%s*$", "%1")
+    bPrint(msg)
 end
 --[[#################################]]--
 
