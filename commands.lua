@@ -3,7 +3,7 @@ local Command = require("classes.command")
 Command({
     name = "Toggle Hyper Mode",
     key = "a",
-    action = function() hyper:toggleHyperMode() end,    
+    action = function() hyper:toggleHyperMode() end,
     showInMenu = true,
     menuTitle = "❖ + A: Toggle Hyper Mode",
     disabled = true
@@ -51,16 +51,7 @@ Command({
 Command({
     name = "Debug Mode Toggle",
     key = "d",
-    action = function()
-        jSettings:set("debug", not jSettings:get("debug"))
-        jSettings:write(true)
-        local debug = jSettings:get("debug")
-        if debug then hs.alert.show("Debug Mode is on") else hs.alert.show("Debug Mode is off") end
-        -- wait a second
-        hs.timer.doAfter(1, function()
-            hs.reload()
-        end)
-    end,
+    action = function() DebugModeToggle() end,
     showInMenu = true,
     menuTitle = "❖ + D: Toggle Debug Mode"
 })
@@ -88,6 +79,14 @@ Command({
     end,
     showInMenu = true,
     menuTitle = "❖ + S: Restart Sketchybar"
+})
+
+Command({
+    name = "WezTerm Split Vertically",
+    key = "]",
+    action = function() end,
+    showInMenu = false,
+    menuTitle = "",
 })
 
 hyper:updateMenubar()

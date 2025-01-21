@@ -89,11 +89,23 @@ function trimIndent(str)
   return rStr
 end
 
+function DebugModeToggle()
+  jSettings:set("debug", not jSettings:get("debug"))
+  jSettings:write(true)
+  local debug = jSettings:get("debug")
+  if debug then hs.alert.show("Debug Mode is on") else hs.alert.show("Debug Mode is off") end
+  -- wait a second
+  hs.timer.doAfter(1, function()
+      hs.reload()
+  end)
+end
+
 
 __setGlobals__({
   unixTimestamp = unixTimestamp,
   str = str,
   debugPrint = dPrint,
+  DebugModeToggle = DebugModeToggle,
   readFile = readFile,
   booltoStr = boolToStr,
   cleanStringTable = cleanStringTable,

@@ -5,7 +5,7 @@ local class = require('classes.class')
 ---@class Hyper
 ---@field hyperModeActive boolean
 ---@field commands table
----@field vncMode boolean
+---@field menubarStatus string
 ---@field keyDownTracker hs.eventtap
 ---@field menubarItem hs.menubar | Optional
 local Hyper = class({ name = "Hyper" })
@@ -23,7 +23,7 @@ local Hyper = class({ name = "Hyper" })
 function Hyper:init()
     self.hyperModeActive = false
     self.commands = {}
-    self.vncMode = false
+    self.menubarStatus = "inactive"
     self.keyDownTracker = self:returnKeyDownTracker()
     self.keyUpTracker = self:returnKeyUpTracker()
     --self.mouseButtonTracker = self:returnMouseButtonDownTracker()
@@ -53,6 +53,7 @@ end
 
 
 function Hyper:registerCommandAlt(name, key, action, showInMenu, menuTitle)
+    logger:debug("Registering Command: ${n}" % {n=name})
     self.commands[key] = {
         name = name,
         key = key,
@@ -102,10 +103,10 @@ function Hyper:vncModeCheck()
     local vncWatcher = hs.application.watcher.new(function(name, event, app)
         if name == "VNC Viewer" then
             if event == hs.application.watcher.activated then
-                self.vncMode = true
+                self.menubarStatus = "vnc"
                 self:updateMenubar()
             elseif event == hs.application.watcher.deactivated then
-                self.vncMode = false
+                self.menubarStatus = "inactive"
                 self:updateMenubar()
             end
         end
@@ -136,8 +137,10 @@ end
 function Hyper:toggleHyperMode()
     self.hyperModeActive = not self.hyperModeActive
     if self.hyperModeActive then
+        self.menubarStatus = "active"
         hs.alert.show("Hyper Mode Activated")
     else
+        self.menubarStatus = "inactive"
         hs.alert.show("Hyper Mode Deactivated")
     end
     self:updateMenubar()
@@ -147,10 +150,18 @@ end
 ---comment Creates the menubar for the Hyper Mode
 ---@return table
 function Hyper:createMenu()
+
+    local hyperModeStatus = "Hyper Status: " .. (self.hyperModeActive and "Hyper Mode Active" or "Hyper Mode Inactive")
+
     local menu = {
         {
-            title = "Status: " .. (self.hyperModeActive and "Hyper Mode Active 🔴" or "Hyper Mode Inactive ⚪"),
+            title = hyperModeStatus,
             fn = function() self:toggleHyperMode() end
+        },
+        -- debug status
+        {
+            title = "Debug Mode: " .. (jSettings:get("debug", false) and "On" or "Off"),
+            fn = function() DebugModeToggle() end
         },
         { title = "-" },
         {
@@ -170,16 +181,30 @@ function Hyper:createMenu()
     return menu
 end
 
+
+
+
+
+
+local function returnStatusMap(status)
+    -- ⭕ 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫ ⚪ 🍑
+    -- ☠️ 💩 👽 🍆 🐻 👻 💦 👀 👅 🫦 🥑
+    -- 🧄 🧅 🫘 🥨 🍔 🍕 🍟 🌮 🥩 🥓 🧨
+    -- 🎃 😏 🥴
+    STATUS_MAP = {
+        ["active"] = "🔵",
+        ["inactive"] = "⚪",
+        ["vnc"] = "🟢",
+        ["booty"] = "🍑"
+    }
+    return STATUS_MAP[status]
+end
+
+
 ---comment Updates the menubar for the Hyper Mode
 function Hyper:updateMenubar()
     if self.menubarItem then
-        if self.vncMode then
-            self.menubarItem:setTitle("🟢") -- Green dot for VNC
-        elseif self.hyperModeActive then
-            self.menubarItem:setTitle("🔴") -- red dot for active
-        else
-            self.menubarItem:setTitle("⚪") -- White dot for inactive
-        end
+        self.menubarItem:setTitle(returnStatusMap(self.menubarStatus))
     end
     self.menubarItem:setMenu(self:createMenu())
 end
@@ -268,13 +293,10 @@ end
 
 function Hyper:executeCommand(key)
     local command = self.commands[key]
-    if command.disabled then
-        return false
-    end
-    if command then
-        command.action()
-        return true
-    end
+    hs.alert.show("Command Found: ${c}" % {c=command.name})
+    if command.disabled then return false end
+    if command then command.action() return true end
+    hs.alert.show("No command found for key: " .. key)
     return false
 end
 
