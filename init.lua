@@ -9,7 +9,7 @@ with(Timer("Another operation"), function(t)
     local reloadInstance = reload(hsPath)
     reloadInstance:start()
 
-    if jSettings:get("vnc", false) then
+    if jSettings:get("vnc", false) and jSettings:get("dock_handler", false) then
         local docker_handler = require("classes.dock_handler")
     
         local dockHandler = docker_handler({"VNC Viewer"}, 0.0001, 1000, 5)
