@@ -293,10 +293,9 @@ end
 
 function Hyper:executeCommand(key)
     local command = self.commands[key]
-    hs.alert.show("Command Found: ${c}" % {c=command.name})
+    if command == nil then print("No command found for key: " .. key) return false end
     if command.disabled then return false end
     if command then command.action() return true end
-    hs.alert.show("No command found for key: " .. key)
     return false
 end
 

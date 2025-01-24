@@ -81,12 +81,5 @@ Command({
     menuTitle = "❖ + S: Restart Sketchybar"
 })
 
-Command({
-    name = "WezTerm Split Vertically",
-    key = "]",
-    action = function() end,
-    showInMenu = false,
-    menuTitle = "",
-})
 
 hyper:updateMenubar()
