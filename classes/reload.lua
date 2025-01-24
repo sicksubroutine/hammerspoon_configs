@@ -28,14 +28,25 @@ function Reload:watcherSetup()
         self.error("Error: Path does not exist")
         return
     end
-    
+
     self.watcher = hs.pathwatcher.new(str(self.path), function(files)
         if not files then
             self.error("Warning: No files detected")
             return
         end
-        printf("Files detected: %s", table.concat(files, ", "))
-        self:reloadConfig(files)
+
+        -- Filter out any files that contain .git in their path
+        local filtered_files = {}
+        for _, file in ipairs(files) do
+            if not file:match("%.git") then
+                table.insert(filtered_files, file)
+            end
+        end
+
+        if #filtered_files > 0 then
+            printf("Files detected: %s", table.concat(filtered_files, ", "))
+            self:reloadConfig(filtered_files)
+        end
     end)
 
     if not self.watcher then
