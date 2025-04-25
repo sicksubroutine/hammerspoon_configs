@@ -181,11 +181,6 @@ function Hyper:createMenu()
     return menu
 end
 
-
-
-
-
-
 local function returnStatusMap(status)
     -- ⭕ 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫ ⚪ 🍑
     -- ☠️ 💩 👽 🍆 🐻 👻 💦 👀 👅 🫦 🥑
@@ -238,7 +233,6 @@ function Hyper:handleKeyUpEvent(event, key)
     hs.alert.show("Key Up Event: " .. key)
     return false
 end
-
 
 ---comment Handles the key events for fun and profit
 ---@param event hs.eventtap.event

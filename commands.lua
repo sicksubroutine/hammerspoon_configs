@@ -82,4 +82,16 @@ Command({
 })
 
 
+-- A Command that will send a f12 key event to the system
+Command({
+    name = "Send F12 Key Event",
+    key = "p",
+    action = function()
+        hs.alert.show("Sending F12 Key Event")
+        hs.eventtap.keyStroke({}, "f12")
+    end,
+    showInMenu = true,
+    menuTitle = "❖ + P: Send F12 Key Event"
+})
+
 hyper:updateMenubar()

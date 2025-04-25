@@ -23,3 +23,4 @@ dt:updateNow()
 _print("Reached the end of the config at ${d}" % {d = str(dt:strftime(timeOnlyFormat))} )
 hs.alert.show("Config loaded")
 
+-- Test
